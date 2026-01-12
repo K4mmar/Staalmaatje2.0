@@ -24,6 +24,13 @@
           margin: 1.5cm; 
         }
         
+        /* CRUCIAAL: Zorg dat de browser de volledige lengte berekent, niet alleen wat op het scherm past */
+        html, body {
+          height: auto !important;
+          overflow: visible !important;
+          min-height: 0 !important;
+        }
+
         body {
           background-color: white !important;
           margin: 0;
@@ -32,7 +39,14 @@
           print-color-adjust: exact;
         }
 
-        /* Cruciaal: Verberg navigatie en UI elementen */
+        /* Zorg dat de React root div ook volledig uitklapt */
+        #root {
+          height: auto !important;
+          overflow: visible !important;
+          display: block !important;
+        }
+
+        /* Verberg navigatie en UI elementen */
         .no-print, nav, aside, button, .app-interface { 
           display: none !important; 
         }
@@ -44,6 +58,9 @@
             box-shadow: none !important;
             width: 100% !important;
             max-width: none !important;
+            position: relative !important;
+            left: 0 !important;
+            top: 0 !important;
         }
 
         .print-only {
@@ -54,7 +71,7 @@
         .break-inside-avoid {
             break-inside: avoid;
             page-break-inside: avoid;
-            margin-bottom: 1rem; /* Extra ruimte zodat marges niet overlappen */
+            margin-bottom: 1rem;
         }
       }
     </style>

@@ -19,7 +19,7 @@ const PrintLayout: React.FC<PrintLayoutProps> = ({ title, group, children, instr
     }, []);
 
     return (
-        <div className="fixed inset-0 bg-slate-800/90 z-[9999] overflow-y-auto animate-fade-in print:bg-white print:inset-auto print:static print:overflow-visible print:h-auto">
+        <div className="fixed inset-0 bg-slate-800/90 z-[9999] overflow-y-auto animate-fade-in print:bg-white print:inset-auto print:static print:overflow-visible print:h-auto print:block">
             {/* Navigatiebalk (Niet zichtbaar op print) */}
             <div className="no-print fixed top-0 left-0 right-0 bg-slate-900 text-white p-4 flex justify-between items-center shadow-lg z-50">
                 <div className="font-bold text-lg flex items-center gap-2">
@@ -42,7 +42,8 @@ const PrintLayout: React.FC<PrintLayoutProps> = ({ title, group, children, instr
             </div>
 
             {/* Het A4 Papier */}
-            <div className="print-page-container mx-auto bg-white min-h-screen w-full max-w-[21cm] md:my-20 p-8 md:p-12 shadow-2xl print:shadow-none print:m-0 print:p-0 print:w-full">
+            {/* Note: We removed print:p-0 and kept some padding to ensure content doesn't hit the absolute edge if margins behave unexpectedly */}
+            <div className="print-page-container mx-auto bg-white min-h-screen w-full max-w-[21cm] md:my-20 p-8 md:p-12 shadow-2xl print:shadow-none print:m-0 print:p-4 print:w-full print:min-h-0">
                 {/* Header */}
                 <div className="border-b-2 border-black pb-4 mb-6 print:mb-4">
                     <h1 className="text-3xl font-bold text-black mb-2">{title}</h1>
