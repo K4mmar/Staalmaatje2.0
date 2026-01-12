@@ -292,6 +292,8 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, onClose }) => {
     }
 
     // --- PRINT MODE VIEW ---
+    // Here we return early if mode is 'print'. 
+    // This allows TypeScript to infer that 'mode' cannot be 'print' in the rest of the component.
     if (mode === 'print') {
         return (
             <PrintLayout 
@@ -362,7 +364,8 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, onClose }) => {
                         <i className="fas fa-check-double mr-2"></i> Nakijken
                     </button>
                     
-                    <button onClick={() => switchMode('print')} className={`tab-btn ${mode === 'print' ? 'active' : ''}`}>
+                    {/* Note: mode cannot be 'print' here due to early return above, so we remove the check */}
+                    <button onClick={() => switchMode('print')} className="tab-btn">
                         <i className="fas fa-print mr-2"></i> Printen
                     </button>
                 </div>
