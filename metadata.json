@@ -1,0 +1,5 @@
+{
+  "name": "Staalmaatje React",
+  "description": "A spelling worksheet generator using Gemini AI and React.",
+  "requestFramePermissions": []
+}
