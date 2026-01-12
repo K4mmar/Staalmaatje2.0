@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { WorksheetData, UserAnswers, COLORS, ExerciseItem } from '../types';
 import { generateStory, generateExercises } from '../services/geminiService';
 import { CATEGORIES } from '../constants';
+import PrintLayout from './PrintLayout';
 
 interface WorksheetPlayerProps {
     data: WorksheetData;
@@ -58,9 +59,6 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, onClose }) => {
             await ensureExercises();
         }
         setMode(newMode);
-        if (newMode === 'print') {
-            setTimeout(window.print, 500);
-        }
     };
 
     const CheckMark = ({ isCorrect }: { isCorrect: boolean }) => (
@@ -200,16 +198,21 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, onClose }) => {
         );
     };
 
-    const renderInteractiveExercise = (item: ExerciseItem, index: number) => {
+    const renderInteractiveExercise = (item: ExerciseItem, index: number, isPrintMode: boolean = false) => {
         const answer = answers[item.id] || '';
         const isCorrect = typeof answer === 'string' && answer.toLowerCase().trim() === item.woord.toLowerCase().trim();
 
-        if (mode === 'print') {
+        if (isPrintMode) {
              return (
-                 <div key={item.id} className="p-2 border-b border-slate-100 flex gap-4 break-inside-avoid">
-                     <span className="font-bold text-slate-400 w-6">{index + 1}.</span>
+                 <div key={item.id} className="p-2 border-b border-slate-300 flex gap-4 break-inside-avoid">
+                     <span className="font-bold text-slate-800 w-6 pt-1">{index + 1}.</span>
                      <div className="flex-1">
-                         <p className="text-slate-800">{item.opdracht}</p>
+                         <p className="text-slate-900 mb-1">{item.opdracht.replace(/(\.+)$/, '')}...</p>
+                         {item.type === 'keuze' && item.choices && (
+                            <div className="flex gap-4 text-sm text-slate-600 italic mt-1">
+                                {item.choices.map((c, i) => <span key={i} className="border border-slate-300 px-2 py-0.5 rounded">{c}</span>)}
+                            </div>
+                         )}
                      </div>
                  </div>
              );
@@ -288,6 +291,33 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, onClose }) => {
         );
     }
 
+    // --- PRINT MODE VIEW ---
+    if (mode === 'print') {
+        return (
+            <PrintLayout 
+                title={localData.title} 
+                group={localData.group} 
+                onClose={() => setMode('fill')}
+            >
+                <div className="mb-6">
+                    <h3 className="font-bold text-lg mb-2 border-b border-black inline-block">1. Vul het juiste woord in</h3>
+                    <div className="grid grid-cols-1 gap-2">
+                        {localData.oefeningen?.invulzinnen.map((ex, i) => renderInteractiveExercise(ex, i, true))}
+                    </div>
+                </div>
+
+                {localData.oefeningen && localData.oefeningen.kies_juiste_spelling.length > 0 && (
+                     <div className="mb-6">
+                        <h3 className="font-bold text-lg mb-2 border-b border-black inline-block mt-4">2. Kies de juiste spelling</h3>
+                        <div className="grid grid-cols-1 gap-2">
+                            {localData.oefeningen.kies_juiste_spelling.map((ex, i) => renderInteractiveExercise(ex, i + 5, true))}
+                        </div>
+                    </div>
+                )}
+            </PrintLayout>
+        );
+    }
+
     const showMachine = localData.group === '5' && localData.oefeningen?.speciale_oefeningen;
     const showVerbs = (localData.group === '7' || localData.group === '8' || localData.group === '7/8') && localData.oefeningen?.speciale_oefeningen;
 
@@ -331,6 +361,10 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, onClose }) => {
                     <button onClick={() => switchMode('check')} className={`tab-btn ${mode === 'check' ? 'active' : ''}`}>
                         <i className="fas fa-check-double mr-2"></i> Nakijken
                     </button>
+                    
+                    <button onClick={() => switchMode('print')} className={`tab-btn ${mode === 'print' ? 'active' : ''}`}>
+                        <i className="fas fa-print mr-2"></i> Printen
+                    </button>
                 </div>
             </div>
 
@@ -341,19 +375,8 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, onClose }) => {
             `}</style>
 
             {/* Content */}
-            <div className="p-6 md:p-10 overflow-y-auto bg-slate-50/50 print:bg-white print:p-0 flex-1">
+            <div className="p-6 md:p-10 overflow-y-auto bg-slate-50/50 flex-1">
                 
-                {/* Print Header */}
-                <div className="hidden print:block mb-8 border-b-2 border-slate-800 pb-4">
-                     <h1 className="text-3xl font-bold text-slate-900">
-                        {mode === 'dictee' ? 'Dictee' : 'Spelling Werkblad'}
-                     </h1>
-                     <div className="flex justify-between mt-2 text-lg">
-                         <span>Groep: {localData.group}</span>
-                         <span>Naam: _______________________</span>
-                     </div>
-                </div>
-
                 {/* MODUS: DICTEE */}
                 {mode === 'dictee' && (
                     <div className="max-w-3xl mx-auto">
@@ -403,13 +426,13 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, onClose }) => {
                 )}
 
                 {/* MODUS: INVULLEN / NAKIJKEN */}
-                {(mode === 'fill' || mode === 'check' || mode === 'print') && localData.oefeningen && (
+                {(mode === 'fill' || mode === 'check') && localData.oefeningen && (
                     <div className="max-w-4xl mx-auto space-y-8">
                         {/* Invul Oefeningen */}
                         {localData.oefeningen.invulzinnen.length > 0 && (
                             <div>
-                                <h3 className="text-xl font-bold text-slate-800 mb-4 print:mb-2">1. Maak de zinnen af</h3>
-                                <div className="grid gap-4 print:block">
+                                <h3 className="text-xl font-bold text-slate-800 mb-4">1. Maak de zinnen af</h3>
+                                <div className="grid gap-4">
                                     {localData.oefeningen.invulzinnen.map((ex, i) => renderInteractiveExercise(ex, i))}
                                 </div>
                             </div>
@@ -417,36 +440,34 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, onClose }) => {
                         
                         {/* Keuze Oefeningen */}
                         {localData.oefeningen.kies_juiste_spelling.length > 0 && (
-                            <div className="break-before-page">
-                                <h3 className="text-xl font-bold text-slate-800 mb-4 print:mt-8">2. Kies de juiste spelling</h3>
-                                <div className="grid gap-4 print:block">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800 mb-4 mt-8">2. Kies de juiste spelling</h3>
+                                <div className="grid gap-4">
                                     {localData.oefeningen.kies_juiste_spelling.map((ex, i) => renderInteractiveExercise(ex, i + 5))}
                                 </div>
                             </div>
                         )}
 
-                        {/* Leesverhaal (niet bij print) */}
-                        {mode !== 'print' && (
-                            <div className="mt-12 bg-orange-50 rounded-xl p-6 border border-orange-100 no-print">
-                                <div className="flex justify-between items-center mb-4">
-                                    <h3 className="font-bold text-orange-800 text-lg">
-                                        <i className="fas fa-book-open mr-2"></i> Leesverhaal
-                                    </h3>
-                                    {!story && (
-                                        <button 
-                                            onClick={handleGenerateStory} 
-                                            disabled={loadingStory}
-                                            className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-orange-600 transition-colors"
-                                        >
-                                            {loadingStory ? 'Schrijven...' : 'Maak Verhaal'}
-                                        </button>
-                                    )}
-                                </div>
-                                {story && (
-                                     <div className="prose prose-orange text-slate-800" dangerouslySetInnerHTML={{ __html: story.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>') }} />
+                        {/* Leesverhaal */}
+                        <div className="mt-12 bg-orange-50 rounded-xl p-6 border border-orange-100 no-print">
+                            <div className="flex justify-between items-center mb-4">
+                                <h3 className="font-bold text-orange-800 text-lg">
+                                    <i className="fas fa-book-open mr-2"></i> Leesverhaal
+                                </h3>
+                                {!story && (
+                                    <button 
+                                        onClick={handleGenerateStory} 
+                                        disabled={loadingStory}
+                                        className="bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-orange-600 transition-colors"
+                                    >
+                                        {loadingStory ? 'Schrijven...' : 'Maak Verhaal'}
+                                    </button>
                                 )}
                             </div>
-                        )}
+                            {story && (
+                                    <div className="prose prose-orange text-slate-800" dangerouslySetInnerHTML={{ __html: story.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>') }} />
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

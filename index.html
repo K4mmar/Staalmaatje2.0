@@ -28,38 +28,37 @@
           background-color: white !important;
           margin: 0;
           padding: 0;
+          -webkit-print-color-adjust: exact;
+          print-color-adjust: exact;
         }
 
-        /* VERBERG ALLES WAT BIJ DE APP HOORT */
+        /* Cruciaal: Verberg navigatie en UI elementen */
         .no-print, nav, aside, button, .app-interface { 
           display: none !important; 
         }
         
-        /* TOON ALLEEN DE PRINT VERSIE */
-        .print-only {
-          display: block !important;
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          background: white;
-          color: black;
-          z-index: 9999;
+        /* Zorg dat de print container de volledige breedte pakt */
+        .print-page-container {
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            width: 100% !important;
+            max-width: none !important;
         }
 
-        /* Zorg voor inktbesparing */
-        .print-only * {
-          color: black !important;
-          background: transparent !important;
-          box-shadow: none !important;
+        .print-only {
+          display: block !important;
         }
         
-        .print-break-inside-avoid {
+        /* Voorkom dat blokken doormidden worden geknipt */
+        .break-inside-avoid {
             break-inside: avoid;
+            page-break-inside: avoid;
+            margin-bottom: 1rem; /* Extra ruimte zodat marges niet overlappen */
         }
       }
     </style>
-<script type="importmap">
+  <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@^19.2.3",
