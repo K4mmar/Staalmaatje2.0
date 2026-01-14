@@ -5,9 +5,6 @@ import { WordItem, WorksheetExercises, ExerciseItem } from '../types';
 import { ensureDictionaryLoaded, isInDictionary } from './dictionaryService';
 import { aiGuardrail } from './aiGuardrail';
 
-const apiKey = process.env.API_KEY || '';
-const ai = new GoogleGenAI({ apiKey });
-
 // Helper to sanitize JSON string
 const cleanJson = (text: string) => {
     return text.replace(/```json\n?|```/g, '').trim();
@@ -76,6 +73,8 @@ export const generateStory = async (wordList: string[], group: string): Promise<
     const cacheId = `story-${group}-${wordList.sort().join('-')}`;
 
     return aiGuardrail.execute(cacheId, async () => {
+        // Initialize Gemini client inside the task to ensure up-to-date API key usage from process.env.API_KEY
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         const response = await ai.models.generateContent({
             model: "gemini-3-flash-preview",
             contents: userPrompt,
@@ -103,6 +102,8 @@ export const generateDidacticWordList = async (categoryId: number, group: string
     const cacheId = `wordlist-single-${categoryId}-${group}`;
 
     return aiGuardrail.execute(cacheId, async () => {
+        // Initialize Gemini client inside the task to ensure up-to-date API key usage from process.env.API_KEY
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         const response = await ai.models.generateContent({
             model: "gemini-3-flash-preview",
             contents: prompt,
@@ -164,6 +165,8 @@ export const generateMixedWordList = async (selectedCatIds: number[], group: str
     const cacheId = `wordlist-mixed-v8-${group}-${selectedCatIds.sort().join('-')}`;
 
     return aiGuardrail.execute(cacheId, async () => {
+        // Initialize Gemini client inside the task to ensure up-to-date API key usage from process.env.API_KEY
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
         const response = await ai.models.generateContent({
             model: "gemini-3-flash-preview",
             contents: userPrompt,
@@ -234,6 +237,8 @@ export const generateDictationSentences = async (words: WordItem[], group: strin
 
     try {
         return await aiGuardrail.execute(cacheId, async () => {
+            // Initialize Gemini client inside the task to ensure up-to-date API key usage from process.env.API_KEY
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
             const response = await ai.models.generateContent({
                 model: "gemini-3-flash-preview",
                 contents: prompt,
@@ -319,6 +324,8 @@ export const generateExercises = async (words: WordItem[], group: string): Promi
 
     try {
         return await aiGuardrail.execute(cacheId, async () => {
+            // Initialize Gemini client inside the task to ensure up-to-date API key usage from process.env.API_KEY
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
             const response = await ai.models.generateContent({
                 model: "gemini-3-flash-preview",
                 contents: prompt,
@@ -403,6 +410,8 @@ export const generateSpellingFeedback = async (target: string, userInput: string
 
     try {
         return await aiGuardrail.execute(cacheId, async () => {
+            // Initialize Gemini client inside the task to ensure up-to-date API key usage from process.env.API_KEY
+            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
             const response = await ai.models.generateContent({
                 model: "gemini-3-flash-preview",
                 contents: prompt,

@@ -2,6 +2,11 @@
 export type ViewState = 'dashboard' | 'create' | 'library' | 'player' | 'admin' | 'dictee' | 'rules' | 'info' | 'tester';
 export type GradeLevel = '4' | '5' | '6' | '7' | '8' | '7/8';
 
+// CategoriesMap is a mapping from rule ID to name
+export type CategoriesMap = Record<number, string>;
+// GroupCategoriesMap is a mapping from grade level to allowed rule IDs
+export type GroupCategoriesMap = Record<string | number, number[]>;
+
 export interface SpellingRule {
   id: number;
   naam: string;
@@ -17,14 +22,6 @@ export interface GrammarRule {
   term: string;
   uitleg: string;
   categorie: 'woordsoort' | 'zinsdeel' | 'leesteken';
-}
-
-export interface CategoriesMap {
-  [key: number]: string;
-}
-
-export interface GroupCategoriesMap {
-  [key: string]: number[];
 }
 
 export interface WordItem {

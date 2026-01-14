@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { WorksheetData, UserAnswers, ExerciseItem } from '../types';
+import { WorksheetData, ExerciseItem } from '../types';
 import { generateExercises } from '../services/geminiService';
 import { CATEGORIES, SPELLING_REGELS } from '../constants';
 import PrintLayout from './PrintLayout';
@@ -12,7 +12,6 @@ interface WorksheetPlayerProps {
 }
 
 const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, onClose }) => {
-    
     const [mode, setMode] = useState<'dictee' | 'machine' | 'fill' | 'check' | 'print'>(initialMode);
     const [localData, setLocalData] = useState<WorksheetData>(data);
     const [generatingExercises, setGeneratingExercises] = useState(false);
@@ -67,18 +66,14 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
         const stap3Items = oef.context || oef.invulzinnen || oef.redacteur_oefening || [];
 
         return (
-            <PrintLayout 
-                title={localData.title} 
-                group={localData.group} 
-                onClose={onClose} 
-            >
-                {/* Woordenwolk (Alle 15 woorden) */}
-                <div className="mb-20 text-center">
+            <PrintLayout title={localData.title} group={localData.group} onClose={onClose}>
+                {/* Woordenwolk */}
+                <div className="mb-24 text-center">
                     <div className="inline-block p-10 bg-blue-50/50 border-2 border-blue-200 rounded-[3rem] relative shadow-sm">
                         <div className="absolute -top-5 left-10 bg-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest shadow-md">De Woordenwolk</div>
                         <div className="flex flex-wrap gap-x-8 gap-y-4 justify-center">
                             {localData.woordenlijst.map((w, i) => (
-                                <span key={i} className="font-extrabold text-2xl text-slate-800 transition-all hover:scale-105">
+                                <span key={i} className="font-extrabold text-2xl text-slate-800">
                                     {w.woord}
                                 </span>
                             ))}
@@ -86,7 +81,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                     </div>
                 </div>
 
-                {/* STAP 1: HERKENNEN */}
+                {/* STAP 1 */}
                 <div className="exercise-block mb-24 bg-white relative">
                     <div className="flex items-center gap-4 mb-6">
                         <div className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg text-lg">
@@ -106,10 +101,8 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                             {oef.sorteer_oefening.categorieen.map((catId: number, i: number) => (
                                 <div key={i} className="flex flex-col border-r-2 border-slate-300 last:border-r-0">
                                     <div className="bg-slate-50 p-6 border-b-2 border-slate-300 text-center">
-                                        <div className="w-10 h-10 rounded-full bg-white border-2 border-blue-600 mx-auto flex items-center justify-center text-base font-bold text-blue-600 mb-2 shadow-sm">{catId}</div>
-                                        <div className="font-extrabold text-[11px] text-slate-600 uppercase tracking-widest leading-none px-2">
-                                            {CATEGORIES[catId]}
-                                        </div>
+                                        <div className="w-10 h-10 rounded-full bg-white border-2 border-blue-600 mx-auto flex items-center justify-center text-base font-bold text-blue-600 mb-2">{catId}</div>
+                                        <div className="font-extrabold text-[11px] text-slate-600 uppercase tracking-widest leading-none px-2">{CATEGORIES[catId]}</div>
                                     </div>
                                     <div className="flex-1 bg-white"></div>
                                 </div>
@@ -130,7 +123,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                     )}
                 </div>
 
-                {/* STAP 2: ANALYSE */}
+                {/* STAP 2 */}
                 <div className="exercise-block mb-24 bg-white relative page-break-before">
                     <div className="flex items-center gap-4 mb-6">
                         <div className="w-12 h-12 rounded-full bg-green-600 text-white flex items-center justify-center shadow-lg text-lg">
@@ -188,7 +181,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                     ) : (
                         <div className="space-y-4">
                              {stap2Items.map((item: ExerciseItem, i: number) => (
-                                <div key={i} className="flex items-center justify-between p-4 border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
+                                <div key={i} className="flex items-center justify-between p-4 border-b border-slate-100">
                                     <span className="font-extrabold text-2xl text-slate-800">{item.woord}</span>
                                     <div className="flex gap-12 mr-4">
                                         {['zn', 'ww', 'bn'].map((type: string) => (
@@ -204,7 +197,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                     ))}
                 </div>
 
-                {/* STAP 3: TOEPASSEN */}
+                {/* STAP 3 */}
                 <div className="exercise-block mb-24 bg-white relative">
                     <div className="flex items-center gap-4 mb-6">
                         <div className="w-12 h-12 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-lg text-lg">
@@ -213,7 +206,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                         <h3 className="font-extrabold text-3xl text-slate-800 tracking-tight">3. Doen & Schrijven</h3>
                     </div>
                     
-                    <div className="bg-orange-50/30 p-5 rounded-2xl text-base mb-10 border-l-8 border-orange-500 leading-relaxed text-slate-700">
+                    <div className="bg-orange-50/30 p-5 rounded-2xl text-base mb-10 border-l-8 border-orange-500 text-slate-700">
                         <strong className="text-orange-900">Opdracht:</strong> {stap3Items[0]?.type === 'redacteur' ? "In deze zinnen zijn de dikgedrukte woorden fout geschreven. Kun jij ze verbeteren op de lijnen?" : "Maak de zin af. Gebruik een passend woord uit de woordenwolk van stap 1."}
                     </div>
 
@@ -242,7 +235,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                     </div>
                 </div>
 
-                {/* Footer (Print-only) */}
+                {/* Footer */}
                 <div className="mt-20 text-center text-[10px] text-slate-400 uppercase tracking-[0.3em] border-t border-slate-100 pt-8 font-bold">
                     Gegenereerd door Staalmaatje • Didactisch Trechtermodel • www.staalmaatje.nl
                 </div>
@@ -282,7 +275,6 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                 .tab-btn { flex: 1; padding: 6px 12px; border-radius: 6px; font-size: 0.875rem; font-weight: 600; white-space: nowrap; color: #475569; transition: all; }
                 .tab-btn:hover { background: #f8fafc; }
                 .tab-btn.active { background: #e0e7ff; color: #4338ca; }
-                @media print { .page-break-before { page-break-before: always; } }
             `}</style>
 
             <div className="p-10 overflow-y-auto bg-slate-50/50 flex-1">
