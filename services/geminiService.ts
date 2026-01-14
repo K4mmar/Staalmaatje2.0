@@ -334,8 +334,8 @@ export const generateExercises = async (words: WordItem[], group: string): Promi
 
             const json = JSON.parse(cleanJson(response.text || '{}'));
             
-            const process = (list: any[], type: any): ExerciseItem[] => {
-                return (list || []).map((item, idx) => {
+            const processItems = (list: any[], type: any): ExerciseItem[] => {
+                return (list || []).map((item: any, idx: number) => {
                     const matchedWord = words.find(w => w.woord.toLowerCase() === item.woord?.toLowerCase());
                     return {
                         ...item,
@@ -348,16 +348,16 @@ export const generateExercises = async (words: WordItem[], group: string): Promi
             };
 
             const result: WorksheetExercises = {
-                invulzinnen: process(json.invulzinnen, 'invul'),
-                kies_juiste_spelling: process(json.kies_juiste_spelling, group === '4' ? 'spiegel' : 'keuze'),
+                invulzinnen: processItems(json.invulzinnen, 'invul'),
+                kies_juiste_spelling: processItems(json.kies_juiste_spelling, group === '4' ? 'spiegel' : 'keuze'),
                 regelvragen: [],
                 
                 // Groep specifiek
-                gaten_oefening: process(json.gaten_oefening, 'gaten'),
-                klankgroepen_tabel: process(json.klankgroepen_tabel, 'klankgroep'),
-                verander_oefening: process(json.verander_oefening, 'vertaal'),
-                grammatica_oefening: process(json.grammatica_oefening, 'grammatica'),
-                redacteur_oefening: process(json.redacteur_oefening, 'redacteur'),
+                gaten_oefening: processItems(json.gaten_oefening, 'gaten'),
+                klankgroepen_tabel: processItems(json.klankgroepen_tabel, 'klankgroep'),
+                verander_oefening: processItems(json.verander_oefening, 'vertaal'),
+                grammatica_oefening: processItems(json.grammatica_oefening, 'grammatica'),
+                redacteur_oefening: processItems(json.redacteur_oefening, 'redacteur'),
             };
 
             // Voor groep 4 voegen we handmatig de sorteer data toe op basis van de categorieën
@@ -365,7 +365,7 @@ export const generateExercises = async (words: WordItem[], group: string): Promi
                 const uniqueCats = Array.from(new Set(words.map(w => w.categorie)));
                 result.sorteer_oefening = {
                     categorieen: uniqueCats,
-                    woorden: process(words.map(w => ({ woord: w.woord, opdracht: "Sorteer dit woord" })), 'sorteer')
+                    woorden: processItems(words.map(w => ({ woord: w.woord, opdracht: "Sorteer dit woord" })), 'sorteer')
                 };
             }
 
