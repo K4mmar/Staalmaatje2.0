@@ -27,7 +27,7 @@
       @media print {
         @page { 
           size: A4 portrait; 
-          margin: 1.5cm 1.5cm;
+          margin: 1cm 1.5cm; /* Iets krappere boven/onder marge voor max ruimte */
         }
         
         html, body {
@@ -39,6 +39,7 @@
         body {
           margin: 0;
           padding: 0;
+          font-size: 11pt; /* Iets kleiner lettertype voor compactheid */
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
         }
@@ -53,32 +54,43 @@
             margin: 0 !important;
             padding: 0 !important;
             background: white !important;
+            box-shadow: none !important;
         }
 
         .print-only {
           display: block !important;
         }
         
+        /* Oefening blokken strakker */
         .exercise-block {
             break-inside: avoid;
             page-break-inside: avoid;
-            margin-bottom: 6rem; /* De gevraagde ruimte tussen blokken */
-            border-radius: 1.5rem;
-            border: 1px solid #cbd5e1;
-            padding: 2.5rem;
+            margin-bottom: 2rem; /* Minder marge tussen blokken */
+            border-radius: 1rem;
+            border: 1px solid #e2e8f0;
+            padding: 1.5rem;
             background-color: #ffffff;
         }
 
+        /* Forceer nieuwe pagina voor Stap 3 */
+        .force-page-break {
+            page-break-before: always;
+            break-before: page;
+            margin-top: 2rem;
+        }
+
         .writing-line {
-            border-bottom: 1px solid #94a3b8;
-            height: 2.5rem;
+            border-bottom: 1.5px solid #94a3b8;
+            height: 2rem;
             width: 100%;
-            margin-top: 0.75rem;
+            display: block;
+            margin-top: auto;
         }
         
         .dot-line {
-            border-bottom: 2px dotted #000;
+            border-bottom: 2px dotted #94a3b8;
             display: inline-block;
+            min-width: 50px;
         }
 
         h3 {

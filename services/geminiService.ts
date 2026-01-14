@@ -265,62 +265,48 @@ export const generateExercises = async (words: WordItem[], group: string): Promi
     
     if (group === '4') {
         didacticPrompt = `
-        DIDACTIEK GROEP 4: Visuele herkenning & 'Transfer' (toepassen regel).
-        1. Spiegelwoord: Het woord wordt in spiegelbeeld of gehusseld weergegeven.
-        2. Sorteer Oefening: Geef aan in welke categorie kolom de woorden horen.
-        3. Gaten Oefening (Transfer): We oefenen het specifieke 'probleem' van de categorie.
-           - Categorie 1 (Hak): Splits woord in letters (hint: 'b-o-s').
-           - Categorie 2 (Zing): Laat 'ng' of 'nk' weg (hint: 'ba..').
-           - Categorie 3 (Lucht): Laat 'cht' of 'gt' weg (hint: 'lu...').
-           - Categorie 4 (Plank): Laat 'nk' weg.
-           - Categorie 5 (Eer/Oor/Eur): Laat 'eer/oor/eur' weg.
-           - Categorie 6 (Aai/Ooi/Oei): Laat 'aai/ooi/oei' weg.
-           - Categorie 7 (Eeuw/Ieuw): Laat 'eeuw/ieuw' weg.
-           - Categorie 8 (Langermaak): Laat de laatste 'd' of 't' of 'b' of 'p' weg.
-           - Categorie 9 (Voorvoegsel): Laat 'be/ge/ver' weg.
-           - Overig: Laat de klinker of moeilijke letter weg.
+        DIDACTIEK GROEP 4: 
+        1. Spiegelwoord/Hussel: Schrijf het woord correct op.
+        2. Sorteer: Wijs categorie toe.
+        3. Gaten (Transfer): Maak een zin MET GAT. Context moet duidelijk maken welk woord er hoort (bijv: "De vogel zit in de ... (boom)").
         `;
     } else if (group === '5' || group === '6') {
         didacticPrompt = `
-        DIDACTIEK GROEP 5/6: Klankgroepen & Vormverandering.
-        1. Lettergrepen: Splits het woord (bijv. 'bomen' -> 'bo-men').
-        2. Vormverandering: Als het woord enkelvoud is, geef meervoud. Andersom ook. (bijv. 'tak' -> 'takken').
+        DIDACTIEK GROEP 5/6:
+        1. Klankgroepen: Splits woord (bomen -> bo-men).
+        2. Transfer: Maak een zin MET GAT. Contextzin moet logisch zijn.
         `;
     } else {
         didacticPrompt = `
-        DIDACTIEK GROEP 7/8: Context & Grammatica.
-        1. Gatenzinnen: Maak een zin met een gat voor het woord.
-        2. Grammatica: Bepaal woordsoort (zn, ww, bn).
-        3. Redacteur: Maak een zin met het woord FOUT geschreven (voor correctie).
+        DIDACTIEK GROEP 7/8:
+        1. Redacteur: Schrijf een zin met het woord FOUT. (bijv: "De kado is mooi" -> fout woord "kado").
+        2. Context: Maak een zin met gat.
         `;
     }
 
-    const prompt = `Genereer didactische oefeningen voor: ${wordListStr}.
+    const prompt = `Genereer werkbladoefeningen voor: ${wordListStr}.
     ${strategy.systemPrompt}
     ${didacticPrompt}
     
     JSON OUTPUT FORMAT:
     {
-      "invulzinnen": [{ "opdracht": "Zin met ...", "woord": "..." }],
+      "invulzinnen": [{ "opdracht": "Zin met ... op de plek van het woord.", "woord": "..." }],
       "kies_juiste_spelling": [{ "opdracht": "Spiegelwoord", "woord": "..." }], 
       
       "gaten_oefening": [{ 
            "woord": "...", 
            "metadata": { 
-               "prefix": "lu", 
-               "difficultyPart": "cht", 
-               "suffix": "" 
+               "prefix": "...", 
+               "suffix": "..." 
             } 
       }],
       
       "klankgroepen_tabel": [{ "woord": "...", "metadata": { "lettergrepen": "..." } }], 
-      "verander_oefening": [{ "woord": "...", "opdracht": "Zet in meervoud/enkelvoud", "metadata": { "enkelvoudMeervoud": "..." } }],
       
-      "grammatica_oefening": [{ "woord": "...", "metadata": { "woordsoort": "zn/ww/bn" } }],
       "redacteur_oefening": [{ "woord": "...", "metadata": { "foutWoord": "..." }, "opdracht": "Zin met fout woord" }]
     }`;
     
-    const cacheId = `exercises-didactic-v5-${group}-${words.map(w=>w.woord).sort().join('-')}`;
+    const cacheId = `exercises-didactic-v6-${group}-${words.map(w=>w.woord).sort().join('-')}`;
 
     try {
         return await aiGuardrail.execute(cacheId, async () => {
@@ -348,24 +334,26 @@ export const generateExercises = async (words: WordItem[], group: string): Promi
             };
 
             const result: WorksheetExercises = {
+                // Stap 3: Gebruik context zinnen (invulzinnen) voor iedereen als default
                 invulzinnen: processItems(json.invulzinnen, 'invul'),
+                
                 kies_juiste_spelling: processItems(json.kies_juiste_spelling, group === '4' ? 'spiegel' : 'keuze'),
                 regelvragen: [],
                 
                 // Groep specifiek
                 gaten_oefening: processItems(json.gaten_oefening, 'gaten'),
                 klankgroepen_tabel: processItems(json.klankgroepen_tabel, 'klankgroep'),
-                verander_oefening: processItems(json.verander_oefening, 'vertaal'),
-                grammatica_oefening: processItems(json.grammatica_oefening, 'grammatica'),
+                
+                // Redacteur voor 7/8
                 redacteur_oefening: processItems(json.redacteur_oefening, 'redacteur'),
             };
 
-            // Voor groep 4 voegen we handmatig de sorteer data toe op basis van de categorieën
+            // Voor groep 4 voegen we handmatig de sorteer data toe
             if (group === '4') {
                 const uniqueCats = Array.from(new Set(words.map(w => w.categorie)));
                 result.sorteer_oefening = {
                     categorieen: uniqueCats,
-                    woorden: processItems(words.map(w => ({ woord: w.woord, opdracht: "Sorteer dit woord" })), 'sorteer')
+                    woorden: processItems(words.map(w => ({ woord: w.woord, opdracht: "Sorteer" })), 'sorteer')
                 };
             }
 
@@ -373,7 +361,6 @@ export const generateExercises = async (words: WordItem[], group: string): Promi
         });
     } catch (e) {
         console.error("Exercises generation failed", e);
-        // Fallback structure
         return { invulzinnen: [], kies_juiste_spelling: [], regelvragen: [] };
     }
 };
