@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { SPELLING_REGELS, CATEGORIES, getStrategy } from '../constants';
 import { WordItem, WorksheetExercises, ExerciseItem } from '../types';
@@ -253,21 +254,68 @@ export const generateDictationSentences = async (words: WordItem[], group: strin
 
 export const generateExercises = async (words: WordItem[], group: string): Promise<WorksheetExercises> => {
     const strategy = getStrategy(group);
-    const extraInstruction = group === '5' 
-        ? "Maak ook 'speciale_oefeningen' voor de Klankgroepen-machine. Type: 'klankgroep'."
-        : group === '7' || group === '8' || group === '7/8'
-        ? "Maak ook 'speciale_oefeningen' voor werkwoordspelling (ontleding). Type: 'werkwoord'."
-        : "";
+    const wordListStr = words.map(w => w.woord).join(', ');
 
-    const prompt = `Maak spellingoefeningen voor: ${words.map(w=>w.woord).join(',')}.
-    ${strategy.systemPrompt}
-    ${extraInstruction}
-    1. Invul (5x)
-    2. Keuze (5x)
-    3. Regel (5x)
-    JSON output: { "invulzinnen": [], "kies_juiste_spelling": [], "regelvragen": [], "speciale_oefeningen": [] }`;
+    let didacticPrompt = "";
     
-    const cacheId = `exercises-didactic-${group}-${words.map(w=>w.woord).sort().join('-')}`;
+    if (group === '4') {
+        didacticPrompt = `
+        DIDACTIEK GROEP 4: Visuele herkenning & 'Transfer' (toepassen regel).
+        1. Spiegelwoord: Het woord wordt in spiegelbeeld of gehusseld weergegeven.
+        2. Sorteer Oefening: Geef aan in welke categorie kolom de woorden horen.
+        3. Gaten Oefening (Transfer): We oefenen het specifieke 'probleem' van de categorie.
+           - Categorie 1 (Hak): Splits woord in letters (hint: 'b-o-s').
+           - Categorie 2 (Zing): Laat 'ng' of 'nk' weg (hint: 'ba..').
+           - Categorie 3 (Lucht): Laat 'cht' of 'gt' weg (hint: 'lu...').
+           - Categorie 4 (Plank): Laat 'nk' weg.
+           - Categorie 5 (Eer/Oor/Eur): Laat 'eer/oor/eur' weg.
+           - Categorie 6 (Aai/Ooi/Oei): Laat 'aai/ooi/oei' weg.
+           - Categorie 7 (Eeuw/Ieuw): Laat 'eeuw/ieuw' weg.
+           - Categorie 8 (Langermaak): Laat de laatste 'd' of 't' of 'b' of 'p' weg.
+           - Categorie 9 (Voorvoegsel): Laat 'be/ge/ver' weg.
+           - Overig: Laat de klinker of moeilijke letter weg.
+        `;
+    } else if (group === '5' || group === '6') {
+        didacticPrompt = `
+        DIDACTIEK GROEP 5/6: Klankgroepen & Vormverandering.
+        1. Lettergrepen: Splits het woord (bijv. 'bomen' -> 'bo-men').
+        2. Vormverandering: Als het woord enkelvoud is, geef meervoud. Andersom ook. (bijv. 'tak' -> 'takken').
+        `;
+    } else {
+        didacticPrompt = `
+        DIDACTIEK GROEP 7/8: Context & Grammatica.
+        1. Gatenzinnen: Maak een zin met een gat voor het woord.
+        2. Grammatica: Bepaal woordsoort (zn, ww, bn).
+        3. Redacteur: Maak een zin met het woord FOUT geschreven (voor correctie).
+        `;
+    }
+
+    const prompt = `Genereer didactische oefeningen voor: ${wordListStr}.
+    ${strategy.systemPrompt}
+    ${didacticPrompt}
+    
+    JSON OUTPUT FORMAT:
+    {
+      "invulzinnen": [{ "opdracht": "Zin met ...", "woord": "..." }],
+      "kies_juiste_spelling": [{ "opdracht": "Spiegelwoord", "woord": "..." }], 
+      
+      "gaten_oefening": [{ 
+           "woord": "...", 
+           "metadata": { 
+               "prefix": "lu", 
+               "difficultyPart": "cht", 
+               "suffix": "" 
+            } 
+      }],
+      
+      "klankgroepen_tabel": [{ "woord": "...", "metadata": { "lettergrepen": "..." } }], 
+      "verander_oefening": [{ "woord": "...", "opdracht": "Zet in meervoud/enkelvoud", "metadata": { "enkelvoudMeervoud": "..." } }],
+      
+      "grammatica_oefening": [{ "woord": "...", "metadata": { "woordsoort": "zn/ww/bn" } }],
+      "redacteur_oefening": [{ "woord": "...", "metadata": { "foutWoord": "..." }, "opdracht": "Zin met fout woord" }]
+    }`;
+    
+    const cacheId = `exercises-didactic-v5-${group}-${words.map(w=>w.woord).sort().join('-')}`;
 
     try {
         return await aiGuardrail.execute(cacheId, async () => {
@@ -279,28 +327,46 @@ export const generateExercises = async (words: WordItem[], group: string): Promi
 
             const json = JSON.parse(cleanJson(response.text || '{}'));
             
-            const process = (list: any[], type: string): ExerciseItem[] => {
+            const process = (list: any[], type: any): ExerciseItem[] => {
                 return (list || []).map((item, idx) => {
                     const matchedWord = words.find(w => w.woord.toLowerCase() === item.woord?.toLowerCase());
                     return {
                         ...item,
                         id: `${type}-${Date.now()}-${idx}`,
-                        type: item.type || type,
+                        type: type,
                         categorie: matchedWord?.categorie || 0,
-                        metadata: matchedWord
+                        metadata: { ...matchedWord, ...(item.metadata || {}) }
                     };
                 });
             };
 
-            return {
+            const result: WorksheetExercises = {
                 invulzinnen: process(json.invulzinnen, 'invul'),
-                kies_juiste_spelling: process(json.kies_juiste_spelling, 'keuze'),
-                regelvragen: process(json.regelvragen, 'regel'),
-                speciale_oefeningen: process(json.speciale_oefeningen, group === '5' ? 'klankgroep' : 'werkwoord')
+                kies_juiste_spelling: process(json.kies_juiste_spelling, group === '4' ? 'spiegel' : 'keuze'),
+                regelvragen: [],
+                
+                // Groep specifiek
+                gaten_oefening: process(json.gaten_oefening, 'gaten'),
+                klankgroepen_tabel: process(json.klankgroepen_tabel, 'klankgroep'),
+                verander_oefening: process(json.verander_oefening, 'vertaal'),
+                grammatica_oefening: process(json.grammatica_oefening, 'grammatica'),
+                redacteur_oefening: process(json.redacteur_oefening, 'redacteur'),
             };
+
+            // Voor groep 4 voegen we handmatig de sorteer data toe op basis van de categorieën
+            if (group === '4') {
+                const uniqueCats = Array.from(new Set(words.map(w => w.categorie)));
+                result.sorteer_oefening = {
+                    categorieen: uniqueCats,
+                    woorden: process(words.map(w => ({ woord: w.woord, opdracht: "Sorteer dit woord" })), 'sorteer')
+                };
+            }
+
+            return result;
         });
     } catch (e) {
-        console.error(e);
+        console.error("Exercises generation failed", e);
+        // Fallback structure
         return { invulzinnen: [], kies_juiste_spelling: [], regelvragen: [] };
     }
 };

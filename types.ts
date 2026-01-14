@@ -1,12 +1,14 @@
-export type ViewState = 'dashboard' | 'create' | 'library' | 'player' | 'admin' | 'dictee' | 'rules' | 'info';
+
+export type ViewState = 'dashboard' | 'create' | 'library' | 'player' | 'admin' | 'dictee' | 'rules' | 'info' | 'tester';
 export type GradeLevel = '4' | '5' | '6' | '7' | '8' | '7/8';
 
 export interface SpellingRule {
   id: number;
   naam: string;
   regel: string;
-  uitgebreide_uitleg?: string; // Uit de PDF
-  versje?: string; // Bijv. Sippe Simon
+  actie?: string;    
+  uitgebreide_uitleg?: string; 
+  versje?: string; 
   voorbeeld: string; 
   fout: string;      
 }
@@ -28,8 +30,7 @@ export interface GroupCategoriesMap {
 export interface WordItem {
   woord: string;
   categorie: number;
-  // Didactische metadata (optioneel, afhankelijk van groep)
-  lettergrepen?: string; // "bo-men"
+  lettergrepen?: string; 
   klankgroepType?: 'kort' | 'lang' | 'twee-teken' | 'medeklinker' | 'anders';
   werkwoord?: {
     stam?: string;
@@ -43,16 +44,34 @@ export interface ExerciseItem {
   opdracht: string;
   woord: string;
   categorie: number;
-  type: 'invul' | 'keuze' | 'regel' | 'klankgroep' | 'werkwoord' | 'sorteer';
+  type: 'invul' | 'keuze' | 'regel' | 'klankgroep' | 'werkwoord' | 'sorteer' | 'hussel' | 'vertaal' | 'grammatica' | 'redacteur' | 'onderstreep' | 'spiegel' | 'gaten';
   choices?: string[];
-  metadata?: any; // Flexibele data voor specifieke oefeningen
+  metadata?: {
+      husselWoord?: string;      
+      difficultyPart?: string;   
+      prefix?: string;           
+      suffix?: string;           
+      lettergrepen?: string;     
+      enkelvoudMeervoud?: string;
+      woordsoort?: string;       
+      foutWoord?: string;        
+  }; 
 }
 
 export interface WorksheetExercises {
   invulzinnen: ExerciseItem[];
-  kies_juiste_spelling: ExerciseItem[];
-  regelvragen: ExerciseItem[];
-  speciale_oefeningen?: ExerciseItem[]; // Voor Groep 5 machine / Groep 7 werkwoorden
+  kies_juiste_spelling: ExerciseItem[]; 
+  sorteer_oefening?: {
+      categorieen: number[];
+      woorden: ExerciseItem[];
+  };
+  gaten_oefening?: ExerciseItem[]; 
+  klankgroepen_tabel?: ExerciseItem[]; 
+  verander_oefening?: ExerciseItem[]; 
+  grammatica_oefening?: ExerciseItem[]; 
+  redacteur_oefening?: ExerciseItem[]; 
+  regelvragen: ExerciseItem[]; 
+  speciale_oefeningen?: ExerciseItem[]; 
 }
 
 export interface WorksheetData {
@@ -67,7 +86,7 @@ export interface WorksheetData {
 }
 
 export interface UserAnswers {
-  [questionId: string]: any; // Changed to any to support objects for complex answers
+  [questionId: string]: any; 
 }
 
 export const COLORS = {

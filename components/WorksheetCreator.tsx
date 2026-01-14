@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { GROUP_CATEGORIES, CATEGORIES } from '../constants';
 import { COLORS, WorksheetData, WordItem } from '../types';
 import { generateMixedWordList, generateExercises, generateDictationSentences } from '../services/geminiService';
 
 interface WorksheetCreatorProps {
-    onWorksheetCreated: (data: WorksheetData) => void;
+    onWorksheetCreated: (data: WorksheetData, mode: 'fill' | 'print') => void; // Aangepast
     onStartDictation: (data: WorksheetData) => void;
 }
 
@@ -105,7 +106,8 @@ const WorksheetCreator: React.FC<WorksheetCreatorProps> = ({ onWorksheetCreated,
                 setStatusText("Oefeningen genereren...");
                 const exercises = await generateExercises(generatedWords, group);
                 baseData.oefeningen = exercises;
-                onWorksheetCreated(baseData);
+                // STUUR MODUS MEE: 'print' als werkblad, anders 'fill' (online)
+                onWorksheetCreated(baseData, type === 'werkblad' ? 'print' : 'fill');
             }
             
         } catch (e: any) {
