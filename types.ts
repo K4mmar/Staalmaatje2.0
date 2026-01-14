@@ -70,6 +70,8 @@ export interface WorksheetExercises {
   verander_oefening?: ExerciseItem[]; 
   grammatica_oefening?: ExerciseItem[]; 
   redacteur_oefening?: ExerciseItem[]; 
+  transformatie?: ExerciseItem[]; 
+  context?: ExerciseItem[];
   regelvragen: ExerciseItem[]; 
   speciale_oefeningen?: ExerciseItem[]; 
 }

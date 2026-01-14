@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { WorksheetData, UserAnswers, COLORS, ExerciseItem } from '../types';
-import { generateStory, generateExercises } from '../services/geminiService';
+import { WorksheetData, UserAnswers, ExerciseItem } from '../types';
+import { generateExercises } from '../services/geminiService';
 import { CATEGORIES, SPELLING_REGELS } from '../constants';
 import PrintLayout from './PrintLayout';
 
@@ -15,14 +15,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
     
     const [mode, setMode] = useState<'dictee' | 'machine' | 'fill' | 'check' | 'print'>(initialMode);
     const [localData, setLocalData] = useState<WorksheetData>(data);
-    const [answers, setAnswers] = useState<UserAnswers>({});
-    const [story, setStory] = useState<string | null>(null);
-    const [loadingStory, setLoadingStory] = useState(false);
     const [generatingExercises, setGeneratingExercises] = useState(false);
-
-    const handleAnswerChange = (id: string, value: any) => {
-        setAnswers(prev => ({ ...prev, [id]: value }));
-    };
 
     const ensureExercises = async () => {
         if (localData.oefeningen) return;
@@ -103,14 +96,14 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                     </div>
                     
                     <div className="bg-blue-50/30 p-5 rounded-2xl text-base mb-10 border-l-8 border-blue-600 leading-relaxed text-slate-700">
-                        <strong className="text-blue-900">Opdracht:</strong> {oef.sorteer_oefening?.categorieen.length > 1 
+                        <strong className="text-blue-900">Opdracht:</strong> {oef.sorteer_oefening?.categorieen && oef.sorteer_oefening.categorieen.length > 1 
                             ? "Kijk goed naar de woordenwolk hierboven. In welke categorie horen de woorden? Schrijf ze in het juiste vak." 
                             : (stap1Items[0]?.categorie === 1 ? "Zet streepjes tussen alle letters van de woorden uit de wolk." : getCategoryAction(stap1Items[0]?.categorie || 1))}
                     </div>
 
-                    {oef.sorteer_oefening && oef.sorteer_oefening.categorieen.length > 1 ? (
+                    {oef.sorteer_oefening?.categorieen && oef.sorteer_oefening.categorieen.length > 1 ? (
                         <div className="grid grid-cols-3 border-2 border-slate-300 rounded-[2rem] overflow-hidden min-h-[400px] shadow-sm">
-                            {oef.sorteer_oefening.categorieen.map((catId, i) => (
+                            {oef.sorteer_oefening.categorieen.map((catId: number, i: number) => (
                                 <div key={i} className="flex flex-col border-r-2 border-slate-300 last:border-r-0">
                                     <div className="bg-slate-50 p-6 border-b-2 border-slate-300 text-center">
                                         <div className="w-10 h-10 rounded-full bg-white border-2 border-blue-600 mx-auto flex items-center justify-center text-base font-bold text-blue-600 mb-2 shadow-sm">{catId}</div>
@@ -124,7 +117,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 gap-x-16 gap-y-6">
-                             {stap1Items.map((item, i) => (
+                             {stap1Items.map((item: ExerciseItem, i: number) => (
                                 <div key={i} className="flex items-end gap-4 pb-3 border-b border-slate-100">
                                      <span className="text-slate-300 font-bold text-base w-6">{i+1}</span>
                                      <div className="text-xl font-bold text-slate-800 w-40">{item.woord}</div>
@@ -152,7 +145,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
 
                     {gr === '4' ? (
                         <div className="grid grid-cols-2 gap-x-20 gap-y-10">
-                            {stap2Items.map((item, i) => {
+                            {stap2Items.map((item: ExerciseItem, i: number) => {
                                 const fullWord = item.woord || "";
                                 const prefix = item.metadata?.prefix || "";
                                 const suffix = item.metadata?.suffix || "";
@@ -183,7 +176,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                 </tr>
                             </thead>
                             <tbody>
-                                {stap2Items.map((item, i) => (
+                                {stap2Items.map((item: ExerciseItem, i: number) => (
                                     <tr key={i} className="border-b border-slate-200 last:border-0 h-20">
                                         <td className="p-6 font-extrabold text-2xl text-slate-800">{item.woord}</td>
                                         <td className="p-6 border-l border-slate-100"></td>
@@ -194,11 +187,11 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                         </table>
                     ) : (
                         <div className="space-y-4">
-                             {stap2Items.map((item, i) => (
+                             {stap2Items.map((item: ExerciseItem, i: number) => (
                                 <div key={i} className="flex items-center justify-between p-4 border-b border-slate-100 hover:bg-slate-50/50 transition-colors">
                                     <span className="font-extrabold text-2xl text-slate-800">{item.woord}</span>
                                     <div className="flex gap-12 mr-4">
-                                        {['zn', 'ww', 'bn'].map(type => (
+                                        {['zn', 'ww', 'bn'].map((type: string) => (
                                             <div key={type} className="flex items-center gap-3">
                                                 <div className="w-8 h-8 border-2 border-slate-400 rounded-lg bg-white shadow-inner"></div>
                                                 <span className="font-bold text-slate-400 uppercase text-xs tracking-widest">{type}</span>
@@ -225,18 +218,18 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                     </div>
 
                     <div className="space-y-12">
-                        {stap3Items.slice(0, 8).map((item, i) => (
+                        {stap3Items.slice(0, 8).map((item: ExerciseItem, i: number) => (
                             <div key={i} className="flex gap-6">
                                 <span className="bg-slate-100 w-10 h-10 rounded-full flex items-center justify-center font-bold text-slate-500 text-base flex-shrink-0 shadow-sm border border-slate-200">{i+1}</span>
                                 <div className="flex-1">
-                                    <p className="text-2xl leading-[1.6] text-slate-800 mb-6 font-medium">
-                                        {item.opdracht.split('...').map((part, pIdx, arr) => (
+                                    <div className="text-2xl leading-[1.6] text-slate-800 mb-6 font-medium">
+                                        {item.opdracht.split('...').map((part: string, pIdx: number, arr: string[]) => (
                                             <React.Fragment key={pIdx}>
                                                 {part}
                                                 {pIdx < arr.length - 1 && <span className="inline-block w-48 border-b-2 border-slate-400 border-dotted mx-2 relative top-1"></span>}
                                             </React.Fragment>
                                         ))}
-                                    </p>
+                                    </div>
                                     {item.type === 'redacteur' && (
                                         <div className="space-y-4 mt-8">
                                             <div className="h-10 border-b-2 border-slate-300 w-full"></div>
