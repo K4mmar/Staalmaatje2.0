@@ -114,14 +114,15 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
             <PrintLayout title={localData.title} group={localData.group} onClose={onClose}>
                 {/* --- PAGINA 1: WOORDEN, SORTEREN, ANALYSEREN --- */}
                 
-                <div className="mb-8 text-center">
-                    <div className="inline-block px-8 py-4 bg-blue-50/50 border border-blue-200 rounded-2xl relative shadow-sm max-w-2xl">
-                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-md">
+                {/* Compactere Woordenwolk voor Print */}
+                <div className="mb-6 print:mb-4 text-center">
+                    <div className="inline-block px-6 py-3 print:px-4 print:py-2 bg-blue-50/50 border border-blue-200 rounded-2xl relative shadow-sm max-w-2xl print:bg-white print:border-slate-300 print:rounded-lg">
+                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-3 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-md print:hidden">
                             Woordenwolk
                         </div>
-                        <div className="flex flex-wrap gap-x-6 gap-y-2 justify-center">
+                        <div className="flex flex-wrap gap-x-6 gap-y-2 justify-center print:gap-x-4 print:gap-y-1">
                             {shuffledWords.map((w, i) => (
-                                <span key={i} className="font-bold text-lg text-slate-800">
+                                <span key={i} className="font-bold text-lg text-slate-800 print:text-base">
                                     {w.woord}
                                 </span>
                             ))}
@@ -130,29 +131,29 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                 </div>
 
                 {/* STAP 1 */}
-                <div className="exercise-block mb-8 bg-white relative">
-                    <div className="flex items-center gap-3 mb-4 mt-6">
-                        <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md text-sm">1</div>
-                        <h3 className="font-bold text-xl text-slate-800">
+                <div className="exercise-block mb-8 print:mb-4 bg-white relative print:break-inside-avoid">
+                    <div className="flex items-center gap-3 mb-4 mt-6 print:mt-0 print:mb-2">
+                        <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-md text-sm print:w-6 print:h-6 print:text-xs">1</div>
+                        <h3 className="font-bold text-xl text-slate-800 print:text-lg">
                             {oef.sorteer_oefening?.categorieen && oef.sorteer_oefening.categorieen.length > 1 ? "Kijken & Sorteren" : "Kijken & Schrijven"}
                         </h3>
                     </div>
-                    <div className="text-sm text-slate-600 mb-6 italic">Opdracht: {getStep1Instruction()}</div>
+                    <div className="text-sm text-slate-600 mb-6 print:mb-2 italic">Opdracht: {getStep1InstructionText(oef.sorteer_oefening?.categorieen[0] || 1)}</div>
 
                     {oef.sorteer_oefening?.categorieen && oef.sorteer_oefening.categorieen.length > 1 ? (
                         /* MULTI CATEGORY VIEW (SORTEREN) */
-                        <div className="flex border border-slate-300 rounded-xl overflow-hidden min-h-[250px] shadow-sm">
+                        <div className="flex border border-slate-300 rounded-xl overflow-hidden min-h-[250px] print:min-h-[180px] shadow-sm">
                             {oef.sorteer_oefening.categorieen.map((catId: number, colIndex: number) => {
                                 const exampleItem = colIndex === 0 ? localData.woordenlijst.find(w => w.categorie === catId) : null;
                                 return (
                                     <div key={colIndex} className="flex-1 flex flex-col border-r border-slate-300 last:border-r-0">
-                                        <div className="bg-slate-50 p-2 border-b border-slate-300 text-center">
+                                        <div className="bg-slate-50 p-2 border-b border-slate-300 text-center print:p-1">
                                             <div className="inline-flex items-center justify-center px-2 py-1 bg-white border border-blue-600 rounded-lg text-blue-600 text-xs font-bold gap-1 shadow-sm">
                                                 <span>{catId}</span>
-                                                <span className="uppercase tracking-tighter text-[9px]">{CATEGORIES[catId]?.substring(0, 8)}..</span>
+                                                <span className="uppercase tracking-tighter text-[9px] print:hidden">{CATEGORIES[catId]?.substring(0, 8)}..</span>
                                             </div>
                                         </div>
-                                        <div className="flex-1 bg-white p-4 space-y-6">
+                                        <div className="flex-1 bg-white p-4 space-y-6 print:space-y-5 print:p-2">
                                             {[...Array(5)].map((_, idx) => (
                                                 <div key={idx} className="border-b border-slate-200 h-4 relative">
                                                     {idx === 0 && exampleItem && (
@@ -171,7 +172,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                         /* SINGLE CATEGORY VIEW (FOCUS) */
                         <div className="columns-3 gap-8">
                              {stap1Items.slice(0, 15).map((item: ExerciseItem, i: number) => (
-                                <div key={i} className="flex items-end gap-2 break-inside-avoid mb-4">
+                                <div key={i} className="flex items-end gap-2 break-inside-avoid mb-4 print:mb-2">
                                      <span className="text-slate-400 font-bold text-xs w-4">{i+1}.</span>
                                      <div className="flex-1 border-b border-slate-300 h-6 relative">
                                         {i === 0 && (
@@ -186,22 +187,22 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                     )}
                 </div>
 
-                {/* STAP 2: GEGROEPEERD PER OPDRACHT */}
-                <div className="exercise-block bg-white relative">
-                    <div className="flex items-center gap-3 mb-4 mt-6">
-                        <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center shadow-md text-sm">2</div>
-                        <h3 className="font-bold text-xl text-slate-800">
+                {/* STAP 2: GEGROEPEERD PER OPDRACHT (Compactere Print Versie) */}
+                <div className="exercise-block bg-white relative print:break-inside-auto">
+                    <div className="flex items-center gap-3 mb-4 mt-6 print:mt-2 print:mb-2">
+                        <div className="w-8 h-8 rounded-full bg-green-600 text-white flex items-center justify-center shadow-md text-sm print:w-6 print:h-6 print:text-xs">2</div>
+                        <h3 className="font-bold text-xl text-slate-800 print:text-lg">
                              Denken & Analyseren
                         </h3>
                     </div>
 
                     {Object.entries(groupedStep2).map(([instruction, groupItems], groupIdx) => (
-                        <div key={groupIdx} className="mb-8 last:mb-0">
-                            <div className="text-sm text-slate-600 mb-4 italic bg-slate-50 p-2 rounded border border-slate-100 inline-block">
+                        <div key={groupIdx} className="mb-8 last:mb-0 print:mb-4">
+                            <div className="text-sm text-slate-600 mb-4 print:mb-2 italic bg-slate-50 p-2 rounded border border-slate-100 inline-block print:p-1 print:bg-transparent print:border-none print:text-xs">
                                 <strong>Opdracht:</strong> {instruction}
                             </div>
                             
-                            <div className="columns-2 gap-12">
+                            <div className="columns-2 gap-12 print:gap-8">
                                 {groupItems.map((item: ExerciseItem, idx: number) => {
                                     const currentIndex = itemCounterStap2++;
                                     const fullWord = item.woord || "";
@@ -220,7 +221,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                                     <i className="fas fa-arrow-right text-[8px] text-slate-300"></i>
                                                     <div className="flex-1 text-center bg-slate-50 border border-slate-200 rounded px-1">Wie?</div>
                                                 </div>
-                                                <div className="border-b border-slate-300 h-8 w-full relative bg-slate-50/30">
+                                                <div className="border-b border-slate-300 h-8 print:h-6 w-full relative bg-slate-50/30">
                                                     {isExample && (
                                                         <span className="absolute bottom-0 text-slate-400 font-handwriting text-lg p-1">
                                                             {fullWord} ({item.metadata?.infinitief || 'infinitief'})
@@ -232,14 +233,14 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                     } else if (item.type === 'klankgroep' || item.type === 'splits') {
                                         visualContent = (
                                             <div className="flex items-center gap-2">
-                                                <div className={`flex-1 border-slate-300 h-8 w-32 relative ${isExample ? 'border-b' : 'border-b-2 border-dotted'}`}>
+                                                <div className={`flex-1 border-slate-300 h-8 print:h-6 w-32 relative ${isExample ? 'border-b' : 'border-b-2 border-dotted'}`}>
                                                     {isExample && (
                                                         <span className="absolute bottom-0 text-slate-400 font-handwriting text-xl">
                                                             {item.metadata?.lettergrepen || fullWord}
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="w-8 h-8 border border-slate-300 rounded bg-white"></div>
+                                                <div className="w-8 h-8 print:w-6 print:h-6 border border-slate-300 rounded bg-white"></div>
                                             </div>
                                         );
                                     } else if (item.type === 'keuze' || item.type === 'invul' || item.type === 'gaten' || item.type === 'langermaak' || item.type === 'spiegel') {
@@ -310,7 +311,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                     }
 
                                     return (
-                                        <div key={item.id} className="flex items-end gap-3 break-inside-avoid mb-5">
+                                        <div key={item.id} className="flex items-end gap-3 break-inside-avoid mb-5 print:mb-2">
                                             {/* Nummering */}
                                             <span className="text-slate-400 font-bold text-xs w-5 mb-1 text-right">{currentIndex}.</span>
                                             
@@ -321,7 +322,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                             </div>
 
                                             {/* Categorie Badge (Rechts uitgelijnd) */}
-                                            <div className="w-5 h-5 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-[10px] text-slate-400 font-bold flex-shrink-0 mb-1 ml-1">
+                                            <div className="w-5 h-5 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-[10px] text-slate-400 font-bold flex-shrink-0 mb-1 ml-1 print:w-4 print:h-4 print:text-[8px]">
                                                 {item.categorie}
                                             </div>
                                         </div>
@@ -335,16 +336,16 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                 {/* STAP 3 */}
                 <div className="force-page-break">
                     <div className="exercise-block bg-white relative">
-                        <div className="flex items-center gap-3 mb-4 mt-6">
-                            <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-md text-sm">3</div>
-                            <h3 className="font-bold text-xl text-slate-800">Toepassen</h3>
+                        <div className="flex items-center gap-3 mb-4 mt-6 print:mt-4">
+                            <div className="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center shadow-md text-sm print:w-6 print:h-6 print:text-xs">3</div>
+                            <h3 className="font-bold text-xl text-slate-800 print:text-lg">Toepassen</h3>
                         </div>
                         
-                        <div className="text-sm text-slate-600 mb-8 italic bg-orange-50 p-3 rounded-lg border border-orange-100">
+                        <div className="text-sm text-slate-600 mb-8 italic bg-orange-50 p-3 rounded-lg border border-orange-100 print:mb-4 print:p-2">
                             <strong>Opdracht:</strong> {step3MainInstruction}
                         </div>
 
-                        <div className="space-y-8">
+                        <div className="space-y-8 print:space-y-4">
                             {stap3Items.map((item: ExerciseItem, i: number) => {
                                 let content = item.opdracht; 
                                 
@@ -366,7 +367,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                                     {parts[1]}
                                                 </div>
                                                  {/* Categorie Badge (Rechts) */}
-                                                 <div className="ml-auto w-5 h-5 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-[10px] text-slate-400 font-bold flex-shrink-0">
+                                                 <div className="ml-auto w-5 h-5 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-[10px] text-slate-400 font-bold flex-shrink-0 print:w-4 print:h-4 print:text-[8px]">
                                                     {item.categorie}
                                                 </div>
                                             </div>
@@ -383,7 +384,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                                     <span className="inline-block border-b-2 border-dotted border-slate-400 min-w-[120px] mx-1"></span>
                                                     {parts[1]}
                                                 </div>
-                                                <div className="ml-auto w-5 h-5 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-[10px] text-slate-400 font-bold flex-shrink-0">
+                                                <div className="ml-auto w-5 h-5 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-[10px] text-slate-400 font-bold flex-shrink-0 print:w-4 print:h-4 print:text-[8px]">
                                                     {item.categorie}
                                                 </div>
                                             </div>
@@ -394,17 +395,17 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                 // LOGICA VOOR REDACTEUR / BOVENBOUW (Groep 7/8) of Fallback
                                 // Hier tonen we de zin en een schrijfregel eronder.
                                 return (
-                                    <div key={i} className="relative mb-6 break-inside-avoid">
+                                    <div key={i} className="relative mb-6 break-inside-avoid print:mb-3">
                                         <div className="flex gap-3 mb-1">
                                             <span className="text-slate-400 font-bold text-sm pt-1 min-w-[1.5rem] text-right">{i+1}.</span>
                                             <div className="text-base text-slate-800 font-medium w-full font-sans">
                                                 {content}
                                             </div>
-                                            <div className="w-5 h-5 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-[10px] text-slate-400 font-bold flex-shrink-0 mt-1">
+                                            <div className="w-5 h-5 rounded-full border border-slate-200 bg-slate-50 flex items-center justify-center text-[10px] text-slate-400 font-bold flex-shrink-0 mt-1 print:w-4 print:h-4 print:text-[8px]">
                                                 {item.categorie}
                                             </div>
                                         </div>
-                                        <div className="writing-line relative ml-10 border-b border-slate-300 h-8"></div>
+                                        <div className="writing-line relative ml-10 border-b border-slate-300 h-8 print:h-6"></div>
                                     </div>
                                 );
                             })}

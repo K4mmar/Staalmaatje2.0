@@ -27,7 +27,7 @@
       @media print {
         @page { 
           size: A4 portrait; 
-          margin: 1cm 1.5cm; /* Iets krappere boven/onder marge voor max ruimte */
+          margin: 0.5cm 1cm; /* Geoptimaliseerde marges voor 2-pagina layout */
         }
         
         html, body {
@@ -39,7 +39,7 @@
         body {
           margin: 0;
           padding: 0;
-          font-size: 11pt; /* Iets kleiner lettertype voor compactheid */
+          font-size: 11pt;
           -webkit-print-color-adjust: exact;
           print-color-adjust: exact;
         }
@@ -65,10 +65,10 @@
         .exercise-block {
             break-inside: avoid;
             page-break-inside: avoid;
-            margin-bottom: 2rem; /* Minder marge tussen blokken */
-            border-radius: 1rem;
+            margin-bottom: 1.5rem; /* Compactere marge */
+            border-radius: 0.5rem;
             border: 1px solid #e2e8f0;
-            padding: 1.5rem;
+            padding: 1rem;
             background-color: #ffffff;
         }
 
@@ -76,12 +76,12 @@
         .force-page-break {
             page-break-before: always;
             break-before: page;
-            margin-top: 2rem;
+            margin-top: 1rem;
         }
 
         .writing-line {
             border-bottom: 1.5px solid #94a3b8;
-            height: 2rem;
+            height: 1.5rem;
             width: 100%;
             display: block;
             margin-top: auto;
