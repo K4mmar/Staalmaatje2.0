@@ -6,10 +6,13 @@ export const SPELLING_REGELS: SpellingRule[] = [
       "id": 1, 
       "naam": "Hakwoord", 
       "regel": "Ik schrijf het woord zoals ik het hoor.", 
-      "actie": "Zet streepjes tussen de letters (b-o-m).",
+      "actie": "Zet streepjes tussen de letters.",
       "uitgebreide_uitleg": "Ik schrijf het woord zoals ik het hoor. b-o-s bos, d-a-k dak. Speciaal hakwoord: Daar mag geen 'u' tussen (melk, werk).",
       "voorbeeld": "melk", 
-      "fout": "meluk" 
+      "fout": "meluk",
+      "stap1": { "opdracht": "Zet streepjes tussen de letters", "visueel_type": "streepjes" },
+      "stap2": { "titel": "Speciaal Hakwoord", "instructie": "Hoor je een u? Schrijf hem niet!", "type": "discriminatie", "visual_template": "melk | meluk" },
+      "stap3": { "titel": "Zinnen", "instructie": "Vul het hakwoord in.", "type": "invulzin" }
   },
   { 
       "id": 2, 
@@ -17,95 +20,131 @@ export const SPELLING_REGELS: SpellingRule[] = [
       "regel": "Net als bij ding dong.", 
       "actie": "Zet een rondje om 'ng' of 'nk'.",
       "voorbeeld": "jongen", 
-      "fout": "jonggen" 
+      "fout": "jonggen",
+      "stap1": { "opdracht": "Zet een rondje om ng of nk", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Zingwoord", "instructie": "Vul in: ng of nk?", "type": "keuze", "visual_template": "di... (ng/nk)" },
+      "stap3": { "titel": "Context", "instructie": "Maak de zin af.", "type": "context" }
   },
   { 
       "id": 3, 
       "naam": "Luchtwoord", 
-      "regel": "Korte klank + cht met de ch van lucht. Behalve bij: hij ligt, hij legt, hij zegt.", 
-      "actie": "Onderstreep de korte klank en 'cht'.",
-      "versje": "Sippe Simon heeft weer pech.\nAch, het is zo’n lekker joch.\nDraait zich om en, och, niet huilen.\nSippe Simon, lach nou toch.\nSimon roept na eerst wat kuchen\n“Kijk dan, ik ben goochelaar!”\nMaar helaas het wordt een chaos,\nzijn techniek is toch niet klaar.\nEindelijk, Simon staat te juichen,\nheel zijn lichaam jubelt mee.\nHij roept: “kachel!”, er klinkt: “kachel”!\nDoor de echo zijn het er twee.",
+      "regel": "Korte klank + cht met de ch van lucht.", 
+      "actie": "Onderstreep 'cht' of 'ch'.",
+      "versje": "Sippe Simon heeft weer pech...",
       "voorbeeld": "lucht", 
-      "fout": "lugt" 
+      "fout": "lugt",
+      "stap1": { "opdracht": "Onderstreep cht of ch", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Luchtwoord", "instructie": "Korte klank? Vul in.", "type": "keuze", "visual_template": "lu...t (g/ch/cht)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 4, 
       "naam": "Plankwoord", 
       "regel": "Daar mag geen 'g' tussen.", 
-      "actie": "Kleur de 'nk'. Geen g!",
+      "actie": "Onderstreep de 'nk'. Geen g!",
       "voorbeeld": "bank", 
-      "fout": "bangk" 
+      "fout": "bangk",
+      "stap1": { "opdracht": "Onderstreep nk", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Plankwoord", "instructie": "Vul in: ng of nk?", "type": "keuze", "visual_template": "ba... (ng/nk)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 5, 
       "naam": "Eer-oor-eur woord", 
       "regel": "Ik schrijf eer, oor, of eur.", 
       "actie": "Onderstreep eer, oor of eur.",
-      "uitgebreide_uitleg": "eer-woord: ik schrijf ee (weer, keer). oor-woord: ik schrijf oo (door, koor). eur-woord: ik schrijf eu (deur, sleur). eel-woord: ik schrijf ee (veel, steel).",
       "voorbeeld": "beer", 
-      "fout": "bir" 
+      "fout": "bir",
+      "stap1": { "opdracht": "Onderstreep eer, oor of eur", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Eer-oor-eur", "instructie": "Vul in: eer, oor of eur?", "type": "keuze", "visual_template": "b... (eer/oor/eur)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 6, 
       "naam": "Aai-ooi-oei woord", 
       "regel": "Ik hoor de 'j', maar ik schrijf de 'i'.", 
       "actie": "Zet een rondje om de 'i' op het eind.",
-      "uitgebreide_uitleg": "aai: haai, maai. ooi: strooi, mooi. oei: loei, roei.",
       "voorbeeld": "haai", 
-      "fout": "haaj" 
+      "fout": "haaj",
+      "stap1": { "opdracht": "Zet een rondje om de i", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Aai-ooi-oei", "instructie": "Vul in: aai, ooi of oei?", "type": "keuze", "visual_template": "h... (aai/ooi/oei)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 7, 
       "naam": "Eeuw-ieuw woord", 
       "regel": "Ik denk aan de 'u'.", 
       "actie": "Zet een rondje om de 'u'.",
-      "uitgebreide_uitleg": "eeuw: sneeuw, geeuw. ieuw: nieuw, kieuw.",
       "voorbeeld": "nieuwe", 
-      "fout": "niewe" 
+      "fout": "niewe",
+      "stap1": { "opdracht": "Zet een rondje om de u", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Eeuw-ieuw", "instructie": "Vergeet de u niet!", "type": "keuze", "visual_template": "sn... (eeuw/ieuw)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 8, 
       "naam": "Langermaakwoord", 
       "regel": "Ik hoor een 't' aan het eind -> langer maken.", 
-      "actie": "Maak het woord langer (hond -> honden).",
-      "uitgebreide_uitleg": "Ik hoor een t aan het eind, dus langer maken. Ik hoor of ik d of t moet schrijven (hond-honden). Ook Langermaakwoord (2): Eind-b rijtje, dus langer maken. Ik hoor dat ik een b moet schrijven (krab-krabben).",
+      "actie": "Onderstreep de d of t op het eind.",
       "voorbeeld": "hond", 
-      "fout": "hont" 
+      "fout": "hont",
+      "stap1": { "opdracht": "Onderstreep de laatste letter (d/t)", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Langermaakwoord", "instructie": "Maak het woord langer. d of t?", "type": "langermaak", "visual_template": "hon... (d/t)" },
+      "stap3": { "titel": "Vervoeging", "instructie": "Enkelvoud of meervoud?", "type": "invulzin" }
   },
   { 
       "id": 9, 
       "naam": "Voorvoegsel", 
       "regel": "Ik hoor de 'u', maar ik schrijf de 'e' (be-, ge-, ver-).", 
-      "actie": "Kleur het voorvoegsel (be, ge, ver).",
-      "uitgebreide_uitleg": "geluk, genoeg, verdwalen en bewaker.",
+      "actie": "Onderstreep het voorvoegsel (be, ge, ver).",
       "voorbeeld": "gebak", 
-      "fout": "gubak" 
+      "fout": "gubak",
+      "stap1": { "opdracht": "Onderstreep be, ge of ver", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Voorvoegsel", "instructie": "Vul in: be, ge of ver.", "type": "invul", "visual_template": "...bak (be/ge/ver)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 10, 
       "naam": "Klankgroepenwoord", 
       "regel": "Klankgroep is... Laatste klank is...", 
-      "actie": "Hak het woord in stukjes. Zet een stip onder de klankgroep.",
-      "uitgebreide_uitleg": "1. Korte klank (a,e,i,o,u) -> dubbele medeklinker (bakker). 2. Lange klank (aa,ee,oo,uu) -> ik gum een stukje weg (bomen). 3. Twee-tekenklank (ie,eu,au) -> schrijf zoals je hoort. 4. Medeklinker -> schrijf zoals je hoort.",
-      "voorbeeld": "bakker / bomen", 
-      "fout": "baker / bommen" 
+      "actie": "Schrijf het woord netjes op.",
+      "voorbeeld": "bomen", 
+      "fout": "bommen",
+      "stap1": { "opdracht": "Schrijf het woord netjes op", "visueel_type": "tekst" },
+      "stap2": { 
+          "titel": "Klankgroepen Schema", 
+          "instructie": "Splits het woord. Welke regel hoort erbij?", 
+          "type": "klankgroep", 
+          "visual_template": "bo - men" 
+      },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 11, 
       "naam": "Verkleinwoord", 
       "regel": "Grondwoord + je/tje/pje.", 
       "actie": "Onderstreep het grondwoord.",
-      "uitgebreide_uitleg": "Grondwoord dan –je, -tje, -pje erachter. Verkleinwoord met -etje: ik hoor twee keer u maar schrijf e. Verkleinwoord met: -aatje, -ootje, -uutje (woord + aatje). Let op: Eerst de regels van het grondwoord toepassen!",
       "voorbeeld": "boompje", 
-      "fout": "boompie" 
+      "fout": "boompie",
+      "stap1": { "opdracht": "Onderstreep het grondwoord", "visueel_type": "onderstreep" },
+      "stap2": { 
+          "titel": "Verkleinwoord", 
+          "instructie": "Analyse: Grondwoord + stukje.", 
+          "type": "splits", 
+          "visual_template": "boom - pje" 
+      },
+      "stap3": { "titel": "Transform", "instructie": "Maak klein.", "type": "invulzin" }
   },
   { 
       "id": 12, 
       "naam": "Achtervoegsel", 
       "regel": "Ik hoor '-ug' of '-luk', maar ik schrijf '-ig' of '-lijk'.", 
-      "actie": "Kleur het achtervoegsel (ig of lijk).",
+      "actie": "Onderstreep het achtervoegsel (ig of lijk).",
       "voorbeeld": "jarig", 
-      "fout": "jarug" 
+      "fout": "jarug",
+      "stap1": { "opdracht": "Onderstreep ig of lijk", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Achtervoegsel", "instructie": "Vul in: ig of lijk?", "type": "keuze", "visual_template": "jar... (ig/lijk)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 13, 
@@ -113,16 +152,21 @@ export const SPELLING_REGELS: SpellingRule[] = [
       "regel": "Ik hoor de 'ie', maar ik schrijf de 'i'.", 
       "actie": "Zet een rondje om de 'i'.",
       "voorbeeld": "piloot", 
-      "fout": "pieloot" 
+      "fout": "pieloot",
+      "stap1": { "opdracht": "Zet een rondje om de i", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Kilowoord", "instructie": "Vul in: i of ie?", "type": "keuze", "visual_template": "p...loot (i/ie)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 14, 
       "naam": "Komma-s meervoud", 
       "regel": "Meervoud en lange klank aan het eind -> komma-s.", 
       "actie": "Omcirkel de komma-s ('s).",
-      "uitgebreide_uitleg": "Eerst de komma, dan de s ('s avonds). Meervoud: Meervoud en lange klank aan het eind: komma s behalve bij ee (kassa's).",
       "voorbeeld": "auto's", 
-      "fout": "autos" 
+      "fout": "autos",
+      "stap1": { "opdracht": "Omcirkel de 's", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Komma-s", "instructie": "Meervoud: s of 's?", "type": "keuze", "visual_template": "auto..." },
+      "stap3": { "titel": "Meervoud", "instructie": "Zet in meervoud.", "type": "invulzin" }
   },
   { 
       "id": 15, 
@@ -130,7 +174,10 @@ export const SPELLING_REGELS: SpellingRule[] = [
       "regel": "Ik hoor de 's', maar ik schrijf de 'c'.", 
       "actie": "Onderstreep de 'c'.",
       "voorbeeld": "citroen", 
-      "fout": "sitroen" 
+      "fout": "sitroen",
+      "stap1": { "opdracht": "Onderstreep de c", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Centwoord", "instructie": "Vul in: s of c?", "type": "keuze", "visual_template": "...itroen (s/c)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 16, 
@@ -138,7 +185,10 @@ export const SPELLING_REGELS: SpellingRule[] = [
       "regel": "Komma-s bij bezit of afkortingen.", 
       "actie": "Omcirkel de komma-s ('s).",
       "voorbeeld": "Anna's", 
-      "fout": "Annas" 
+      "fout": "Annas",
+      "stap1": { "opdracht": "Omcirkel de 's", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Komma-s", "instructie": "Vul in: s of 's?", "type": "keuze", "visual_template": "Anna..." },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 17, 
@@ -146,7 +196,10 @@ export const SPELLING_REGELS: SpellingRule[] = [
       "regel": "Ik hoor 'tsie', maar ik schrijf 'tie'.", 
       "actie": "Zet een rondje om 'tie'.",
       "voorbeeld": "politie", 
-      "fout": "politsie" 
+      "fout": "politsie",
+      "stap1": { "opdracht": "Zet een rondje om tie", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Politiewoord", "instructie": "Vul in: tie of tsie?", "type": "keuze", "visual_template": "poli... (tie/tsie)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 18, 
@@ -154,7 +207,10 @@ export const SPELLING_REGELS: SpellingRule[] = [
       "regel": "Ik hoor de 'k', maar ik schrijf de 'c'.", 
       "actie": "Onderstreep de 'c'.",
       "voorbeeld": "cola", 
-      "fout": "kola" 
+      "fout": "kola",
+      "stap1": { "opdracht": "Onderstreep de c", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Colawoord", "instructie": "Vul in: k of c?", "type": "keuze", "visual_template": "...ola (k/c)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 19, 
@@ -162,7 +218,10 @@ export const SPELLING_REGELS: SpellingRule[] = [
       "regel": "Ik hoor 'ies', maar ik schrijf 'isch'.", 
       "actie": "Onderstreep 'isch'.",
       "voorbeeld": "tropisch", 
-      "fout": "tropies" 
+      "fout": "tropies",
+      "stap1": { "opdracht": "Onderstreep isch", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Tropisch woord", "instructie": "Vul in: ies of isch?", "type": "keuze", "visual_template": "trop... (ies/isch)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 20, 
@@ -170,42 +229,54 @@ export const SPELLING_REGELS: SpellingRule[] = [
       "regel": "Ik hoor 'ks', maar ik schrijf de 'x'.", 
       "actie": "Zet een rondje om de 'x'.",
       "voorbeeld": "taxi", 
-      "fout": "taksi" 
+      "fout": "taksi",
+      "stap1": { "opdracht": "Zet een rondje om de x", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Taxiwoord", "instructie": "Vul in: ks of x?", "type": "keuze", "visual_template": "ta...i (ks/x)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 21, 
       "naam": "Chefwoord", 
       "regel": "Ik hoor 'sj', maar ik schrijf 'ch'.", 
       "actie": "Onderstreep 'ch'.",
-      "uitgebreide_uitleg": "chef, chocola",
       "voorbeeld": "chef", 
-      "fout": "sjef" 
+      "fout": "sjef",
+      "stap1": { "opdracht": "Onderstreep ch", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Chefwoord", "instructie": "Vul in: sj of ch?", "type": "keuze", "visual_template": "...ef (sj/ch)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 22, 
       "naam": "Theewoord", 
       "regel": "Ik hoor 't', maar ik schrijf 'th'.", 
       "actie": "Omcirkel 'th'.",
-      "uitgebreide_uitleg": "thee, theater",
       "voorbeeld": "thee", 
-      "fout": "tee" 
+      "fout": "tee",
+      "stap1": { "opdracht": "Omcirkel th", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Theewoord", "instructie": "Vul in: t of th?", "type": "keuze", "visual_template": "...ee (t/th)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   }, 
   { 
       "id": 23, 
       "naam": "Caféwoord", 
       "regel": "Leenwoord met een streepje op de 'e'.", 
-      "actie": "Zet een rondje om het streepje (é).",
+      "actie": "Zet een rondje om de 'é'.",
       "voorbeeld": "café", 
-      "fout": "cafe" 
+      "fout": "cafe",
+      "stap1": { "opdracht": "Zet een rondje om de é", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Caféwoord", "instructie": "Zet het streepje goed.", "type": "keuze", "visual_template": "caf... (e/é)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 24, 
       "naam": "Cadeauwoord", 
       "regel": "Ik hoor 'oo', maar ik schrijf 'eau'.", 
       "actie": "Onderstreep 'eau'.",
-      "uitgebreide_uitleg": "cadeau, bureau",
       "voorbeeld": "cadeau", 
-      "fout": "kado" 
+      "fout": "kado",
+      "stap1": { "opdracht": "Onderstreep eau", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Cadeauwoord", "instructie": "Vul in: oo of eau?", "type": "keuze", "visual_template": "cad... (oo/eau)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 25, 
@@ -213,34 +284,43 @@ export const SPELLING_REGELS: SpellingRule[] = [
       "regel": "Ik hoor 'oe', maar ik schrijf 'ou'.", 
       "actie": "Onderstreep 'ou'.",
       "voorbeeld": "route", 
-      "fout": "roete" 
+      "fout": "roete",
+      "stap1": { "opdracht": "Onderstreep ou", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Routewoord", "instructie": "Vul in: oe of ou?", "type": "keuze", "visual_template": "r...te (oe/ou)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 26, 
       "naam": "Garagewoord", 
       "regel": "Ik hoor 'zj', maar ik schrijf 'g'.", 
       "actie": "Zet een rondje om de 'g'.",
-      "uitgebreide_uitleg": "garage, bagage",
       "voorbeeld": "garage", 
-      "fout": "garazje" 
+      "fout": "garazje",
+      "stap1": { "opdracht": "Zet een rondje om de g", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Garagewoord", "instructie": "Vul in: zj of g?", "type": "keuze", "visual_template": "gara...e (zj/g)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 27, 
       "naam": "Lollywoord", 
       "regel": "Ik hoor 'ie', maar ik schrijf 'y'.", 
       "actie": "Zet een rondje om de 'y'.",
-      "uitgebreide_uitleg": "Ik schrijf de Griekse y. lolly, baby",
       "voorbeeld": "lolly", 
-      "fout": "lollie" 
+      "fout": "lollie",
+      "stap1": { "opdracht": "Zet een rondje om de y", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Lollywoord", "instructie": "Vul in: ie of y?", "type": "keuze", "visual_template": "bab... (ie/y)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 28, 
       "naam": "Tremawoord", 
       "regel": "Twee puntjes om klinkerbotsing te voorkomen.", 
-      "actie": "Zet een rondje om de puntjes.",
-      "uitgebreide_uitleg": "Puntjes op de klinker (vegetariër, financiële). Trema meervoud: Bij woorden met ee schrijf ik ën erachter (ideeën). Bij woorden met ie schrijf ik ën erachter (knieën). Behalve bij bacteriën, koloniën, oliën.",
+      "actie": "Zet een rondje om de letter met puntjes.",
       "voorbeeld": "poëzie", 
-      "fout": "poezie" 
+      "fout": "poezie",
+      "stap1": { "opdracht": "Zet een rondje om de klinker met trema", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Tremawoord", "instructie": "Zet de puntjes op de juiste plek.", "type": "invul", "visual_template": "po..zie (ë)" },
+      "stap3": { "titel": "Meervoud", "instructie": "Zet in meervoud.", "type": "invulzin" }
   },
   { 
       "id": 29, 
@@ -248,16 +328,21 @@ export const SPELLING_REGELS: SpellingRule[] = [
       "regel": "Ik hoor 'èr', maar ik schrijf 'air'.", 
       "actie": "Onderstreep 'air'.",
       "voorbeeld": "militair", 
-      "fout": "militèr" 
+      "fout": "militèr",
+      "stap1": { "opdracht": "Onderstreep air", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Militairwoord", "instructie": "Vul in: èr of air?", "type": "keuze", "visual_template": "milit... (èr/air)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 30, 
       "naam": "Koppelteken", 
       "regel": "Samenstelling met streepje.", 
       "actie": "Zet een rondje om het streepje.",
-      "uitgebreide_uitleg": "1. Klinkerbotsing: 1e woord eindigt en 2e woord begint met een klinker (zee-egel). 2. Aardrijkskundige namen (Noord-Brabant). 3. Afkortingen (tv-gids). 4. Met ex, oud en bij klaar-over.",
       "voorbeeld": "na-apen", 
-      "fout": "naapen" 
+      "fout": "naapen",
+      "stap1": { "opdracht": "Zet een rondje om het streepje", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Koppelteken", "instructie": "Vergeet het streepje niet!", "type": "invul", "visual_template": "na...apen (-)" },
+      "stap3": { "titel": "Samenstelling", "instructie": "Maak de samenstelling.", "type": "invulzin" }
   },
   { 
       "id": 31, 
@@ -265,16 +350,21 @@ export const SPELLING_REGELS: SpellingRule[] = [
       "regel": "Ik hoor 'waar', ik schrijf 'oir'.", 
       "actie": "Onderstreep 'oir'.",
       "voorbeeld": "trottoir", 
-      "fout": "trottewaar" 
+      "fout": "trottewaar",
+      "stap1": { "opdracht": "Onderstreep oir", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Trottoirwoord", "instructie": "Vul in: waar of oir?", "type": "keuze", "visual_template": "trott... (waar/oir)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 32, 
       "naam": "Tussen-e of -en", 
       "regel": "Meervoud van eerste deel is -en? Dan tussen-n.", 
       "actie": "Onderstreep de tussen-n.",
-      "uitgebreide_uitleg": "De tussen -e komt bij: bijvoeglijk naamwoord (machteloos), eerste woord geen zelfstandig naamwoord (verrekijker), eerste woord geen meervoud of meervoud op -es (secondewijzer), eerste woord is zon/maan/koningin.",
       "voorbeeld": "pannenkoek", 
-      "fout": "pannekoek" 
+      "fout": "pannekoek",
+      "stap1": { "opdracht": "Onderstreep de tussen-n", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Tussen-n", "instructie": "Vul in: e of en?", "type": "keuze", "visual_template": "pann...koek (e/en)" },
+      "stap3": { "titel": "Samenstelling", "instructie": "Maak de samenstelling.", "type": "invulzin" }
   },
   { 
       "id": 33, 
@@ -282,43 +372,54 @@ export const SPELLING_REGELS: SpellingRule[] = [
       "regel": "S's morgens of meervoud op 's.", 
       "actie": "Zet een rondje om de komma-s ('s).",
       "voorbeeld": "baby's", 
-      "fout": "babys" 
+      "fout": "babys",
+      "stap1": { "opdracht": "Zet een rondje om 's", "visueel_type": "cirkel" },
+      "stap2": { "titel": "Apostrofwoord", "instructie": "Vul in: s of 's?", "type": "keuze", "visual_template": "baby..." },
+      "stap3": { "titel": "Meervoud", "instructie": "Zet in meervoud.", "type": "invulzin" }
   },
   { 
       "id": 34, 
       "naam": "Latijns voorvoegsel", 
       "regel": "Ad-, ab-, ob-, sub-.", 
       "actie": "Onderstreep het voorvoegsel.",
-      "uitgebreide_uitleg": "abces, advent, obsessie, substantie",
       "voorbeeld": "adviseren", 
-      "fout": "atviseren" 
+      "fout": "atviseren",
+      "stap1": { "opdracht": "Onderstreep het voorvoegsel", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Latijns Voorvoegsel", "instructie": "Vul de juiste letters in.", "type": "invul", "visual_template": "...viseren (ad)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 35, 
       "naam": "Samenstelling", 
       "regel": "Twee woorden aan elkaar.", 
       "actie": "Zet een streepje tussen de twee woorden.",
-      "uitgebreide_uitleg": "1e woord: (woord+categorie+regel) + 2e woord: (woord+categorie+regel).",
       "voorbeeld": "voetbal", 
-      "fout": "voet bal" 
+      "fout": "voet bal",
+      "stap1": { "opdracht": "Zet een streepje tussen de woorden", "visueel_type": "splits" },
+      "stap2": { "titel": "Samenstelling", "instructie": "Schrijf de woorden aan elkaar.", "type": "invul", "visual_template": "voet + bal" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 36, 
       "naam": "Ei-plaat", 
       "regel": "Weetwoord: staat op de ei-plaat.", 
       "actie": "Onderstreep de 'ei'.",
-      "versje": "EI RAP:\nOnze geit staat in de wei\nmet haar poten in de klei\nen eist een teil met worteltjes en lekker verse prei\nUit de eik valt soms in mei\nuit een heel klein nest een ei\nHet valt steil naar beneden op een zachte rode sprei\nOnze reis gaat met de trein\nHet station is aan het plein,\nmaar de trein moet even wachten op het groene sein.\nHein die zei, ’t is echt een feit,\nMaar, als de knecht de keuken dweilt, heel graag een stukje zeilt.\nWeet je wat Hein ook nog zei?\nEr loopt een engerd op de hei\nen die dreigt zowaar te gooien met een grote kei!",
       "voorbeeld": "trein", 
-      "fout": "trijn" 
+      "fout": "trijn",
+      "stap1": { "opdracht": "Onderstreep ei", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Ei-plaat", "instructie": "Staat het op de ei-plaat? Vul in: ei of ij?", "type": "keuze", "visual_template": "tr...n (ei/ij)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   },
   { 
       "id": 37, 
       "naam": "Au-plaat", 
       "regel": "Weetwoord: staat op de au-plaat.", 
       "actie": "Onderstreep de 'au'.",
-      "versje": "AU RAP:\nDie prachtige pauw\nheeft zo’n last van zijn klauw.\nWat zielig, straks valt de stakker nog flauw.\nLaura eet graag rauw,\ndus niet warm, liever lauw\nmet saus gemaakt van druppeltjes dauw.\nPauls jas is niet blauw,\nmaar een tikkeltje grauw,\nmaar als je dat opmerkt dan krijg je een snauw.\nAls ik vettig kauw\nwordt mijn broek veel te nauw\nen dat doet au! Dus stop ik maar gauw.",
       "voorbeeld": "pauw", 
-      "fout": "pouw" 
+      "fout": "pouw",
+      "stap1": { "opdracht": "Onderstreep au", "visueel_type": "onderstreep" },
+      "stap2": { "titel": "Au-plaat", "instructie": "Staat het op de au-plaat? Vul in: au of ou?", "type": "keuze", "visual_template": "p...w (au/ou)" },
+      "stap3": { "titel": "Context", "instructie": "Vul in.", "type": "context" }
   }
 ];
 

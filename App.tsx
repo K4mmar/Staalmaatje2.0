@@ -9,9 +9,10 @@ import WordGenerator from './components/WordGenerator';
 import DictationCard from './components/DictationCard';
 import InfoHandboek from './components/InfoHandboek';
 import LayoutTester from './components/LayoutTester';
+import ExerciseOverviewLab from './components/ExerciseOverviewLab';
 
 const App: React.FC = () => {
-    const [view, setView] = useState<ViewState>('dashboard');
+    const [view, setView] = useState<ViewState | 'database'>('dashboard');
     const [currentWorksheet, setCurrentWorksheet] = useState<WorksheetData | null>(null);
     const [playerMode, setPlayerMode] = useState<'dictee' | 'fill' | 'print'>('fill'); 
     const [library, setLibrary] = useState<WorksheetData[]>([]);
@@ -110,6 +111,13 @@ const App: React.FC = () => {
             </nav>
 
             <div className="p-4 border-t border-slate-800 space-y-2">
+                <div className="text-xs font-bold text-slate-500 uppercase px-4 mb-2">Labs</div>
+                <button 
+                    onClick={() => setView('database')}
+                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${view === 'database' ? 'bg-cyan-900/50 text-cyan-300' : 'text-slate-500 hover:text-cyan-300'}`}
+                >
+                    <i className="fas fa-database w-5"></i> Oefeningen DB
+                </button>
                 <button 
                     onClick={() => setView('admin')}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${view === 'admin' ? 'bg-purple-900/50 text-purple-300' : 'text-slate-500 hover:text-purple-300'}`}
@@ -138,6 +146,8 @@ const App: React.FC = () => {
                 return <InfoHandboek onBack={() => setView('dashboard')} />;
             case 'tester':
                 return <LayoutTester onBack={() => setView('dashboard')} />;
+            case 'database':
+                return <ExerciseOverviewLab onBack={() => setView('dashboard')} />;
             case 'player':
                 return currentWorksheet ? <WorksheetPlayer data={currentWorksheet} initialMode={playerMode} onClose={() => setView('library')} /> : <Dashboard onNavigate={setView} />;
             case 'dictee':
