@@ -156,7 +156,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                             {[...Array(5)].map((_, idx) => (
                                                 <div key={idx} className="border-b border-slate-200 h-4 relative">
                                                     {idx === 0 && exampleItem && (
-                                                        <span className="absolute bottom-0 left-0 text-slate-300 font-handwriting text-lg">
+                                                        <span className="absolute bottom-0 left-0 text-slate-400 font-handwriting text-xl">
                                                             {exampleItem.woord}
                                                         </span>
                                                     )}
@@ -175,7 +175,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                      <span className="text-slate-400 font-bold text-xs w-4">{i+1}.</span>
                                      <div className="flex-1 border-b border-slate-300 h-6 relative">
                                         {i === 0 && (
-                                            <span className="absolute bottom-0 left-0 text-slate-300 font-handwriting text-lg">
+                                            <span className="absolute bottom-0 left-0 text-slate-400 font-handwriting text-xl">
                                                 <DidacticStyledWord word={item.woord} catId={item.categorie} metadata={item.metadata} />
                                             </span>
                                         )}
@@ -222,7 +222,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                                 </div>
                                                 <div className="border-b border-slate-300 h-8 w-full relative bg-slate-50/30">
                                                     {isExample && (
-                                                        <span className="absolute bottom-0 text-slate-400 font-sans text-sm p-1">
+                                                        <span className="absolute bottom-0 text-slate-400 font-handwriting text-lg p-1">
                                                             {fullWord} ({item.metadata?.infinitief || 'infinitief'})
                                                         </span>
                                                     )}
@@ -234,7 +234,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                             <div className="flex items-center gap-2">
                                                 <div className={`flex-1 border-slate-300 h-8 w-32 relative ${isExample ? 'border-b' : 'border-b-2 border-dotted'}`}>
                                                     {isExample && (
-                                                        <span className="absolute bottom-0 text-slate-400 font-sans text-lg">
+                                                        <span className="absolute bottom-0 text-slate-400 font-handwriting text-xl">
                                                             {item.metadata?.lettergrepen || fullWord}
                                                         </span>
                                                     )}
@@ -248,12 +248,12 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                         const choices = item.metadata?.choices || [];
                                         
                                         if (isExample) {
-                                            // VOORBEELD: Volledig woord in Standaard Font (grijs)
+                                            // VOORBEELD: Handgeschreven grijs
                                             visualContent = (
-                                                <div className="flex items-baseline gap-0.5 text-lg font-sans text-slate-400">
+                                                <div className="flex items-baseline gap-0.5 text-lg font-handwriting text-slate-400">
                                                     <span>{fullWord}</span>
-                                                    {choices.length > 0 && <span className="text-sm text-slate-300 ml-2">({choices.join('/')})</span>}
-                                                    {item.type === 'langermaak' && <span className="text-sm text-slate-300 ml-2">(d/t)</span>}
+                                                    {choices.length > 0 && <span className="text-sm ml-2 font-sans">({choices.join('/')})</span>}
+                                                    {item.type === 'langermaak' && <span className="text-sm ml-2 font-sans">(d/t)</span>}
                                                 </div>
                                             );
                                         } else {
@@ -277,21 +277,21 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                         }
                                     } else if (item.type === 'discriminatie') {
                                          const fout = item.metadata?.foutWoord || "";
-                                         // Bepaal een logisch afbreekpunt voor de invuloefening (laatste 2 letters zijn vaak de valkuil bij cat 1)
+                                         // Bepaal een logisch afbreekpunt voor de invuloefening
                                          const splitIndex = fullWord.length > 3 ? fullWord.length - 2 : fullWord.length - 1;
                                          const prefix = fullWord.substring(0, splitIndex);
 
                                          if (isExample) {
-                                            // Voorbeeld: Duidelijk contrast. melk -> meluk (fout)
+                                            // Voorbeeld: Handgeschreven
                                             visualContent = (
-                                                <div className="flex items-center gap-2 text-lg font-sans text-slate-600">
-                                                    <span className="font-bold text-slate-800">{fullWord}</span>
-                                                    <span className="text-slate-300 text-sm">|</span>
+                                                <div className="flex items-center gap-2 text-lg font-handwriting text-slate-400">
+                                                    <span className="font-bold">{fullWord}</span>
+                                                    <span className="text-slate-300 text-sm font-sans">|</span>
                                                     <span className="line-through decoration-red-400 decoration-2 text-red-300">{fout}</span>
                                                 </div>
                                             );
                                          } else {
-                                            // Oefening: Actief denken. 'wo...' invullen.
+                                            // Oefening: Actief denken.
                                             visualContent = (
                                                 <div className="flex items-baseline text-lg text-slate-800">
                                                     <span className="font-sans">{prefix}</span>
@@ -303,7 +303,7 @@ const WorksheetPlayer: React.FC<WorksheetPlayerProps> = ({ data, initialMode, on
                                         // Fallback visual
                                         visualContent = (
                                             <div className="flex items-center gap-2 w-full">
-                                                <span className={`font-bold text-sm w-24 ${isExample ? 'font-sans text-slate-400' : 'font-sans text-slate-800'}`}>{fullWord}</span>
+                                                <span className={`font-bold text-sm w-24 ${isExample ? 'font-handwriting text-slate-400 text-xl' : 'font-sans text-slate-800'}`}>{fullWord}</span>
                                                 <span className="flex-1 border-b border-slate-300 h-6"></span>
                                             </div>
                                         );
