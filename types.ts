@@ -51,6 +51,8 @@ export interface GrammarRule {
 export interface WordItem {
   woord: string;
   categorie: number;
+  dicteeZin?: string;   // Nieuw: Zin voor dictee (leerkracht leest voor)
+  contextZin?: string;  // Nieuw: Zin voor werkblad (leerling vult in)
   lettergrepen?: string; 
   klankgroepType?: 'kort' | 'lang' | 'twee-teken' | 'medeklinker' | 'anders';
   werkwoord?: {

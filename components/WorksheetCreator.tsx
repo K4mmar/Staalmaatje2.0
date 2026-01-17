@@ -1,333 +1,318 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { GROUP_CATEGORIES, CATEGORIES } from '../constants';
-import { COLORS, WorksheetData, WordItem } from '../types';
-import { generateMixedWordList, generateExercises, generateDictationSentences } from '../services/geminiService';
+import { WorksheetData, WordItem } from '../types';
+import { generateMixedWordList, generateExercises } from '../services/geminiService';
 
 interface WorksheetCreatorProps {
-    onWorksheetCreated: (data: WorksheetData, mode: 'fill' | 'print') => void; // Aangepast
+    onWorksheetCreated: (data: WorksheetData, mode: 'fill' | 'print') => void; 
     onStartDictation: (data: WorksheetData) => void;
 }
 
+type WizardStep = 'group' | 'categories' | 'processing' | 'actions';
+
 const WorksheetCreator: React.FC<WorksheetCreatorProps> = ({ onWorksheetCreated, onStartDictation }) => {
-    const [stage, setStage] = useState<0 | 1 | 2>(0);
+    // State for the Wizard Flow
+    const [step, setStep] = useState<WizardStep>('group');
     const [group, setGroup] = useState<string>('4');
     const [selectedCatIds, setSelectedCatIds] = useState<number[]>([]);
-    const [generatedWords, setGeneratedWords] = useState<WordItem[]>([]);
     
+    // Data State
+    const [generatedData, setGeneratedData] = useState<WorksheetData | null>(null);
+    const [logs, setLogs] = useState<string[]>([]);
+
     // UI States
-    const [isLoading, setIsLoading] = useState(false);
-    const [statusText, setStatusText] = useState('');
-    const [error, setError] = useState<string | null>(null);
     const [cooldown, setCooldown] = useState<number>(0);
     const [isDailyLimit, setIsDailyLimit] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const logsEndRef = useRef<HTMLDivElement>(null);
 
-    // Cooldown Timer Effect
+    // Auto-scroll logs
+    useEffect(() => {
+        logsEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }, [logs]);
+
+    // Cooldown Timer
     useEffect(() => {
         if (cooldown > 0) {
-            const timer = setInterval(() => {
-                setCooldown(prev => prev - 1);
-            }, 1000);
+            const timer = setInterval(() => setCooldown(prev => prev - 1), 1000);
             return () => clearInterval(timer);
         }
     }, [cooldown]);
 
-    const handleQuotaError = (isDaily: boolean = false) => {
-        if (isDaily) {
-            setIsDailyLimit(true);
-            setError("DAGLIMIET BEREIKT. Je hebt het maximum aantal verzoeken voor vandaag verbruikt (1500). De teller reset morgenochtend (ca. 09:00).");
-        } else {
-            setCooldown(60); // 60 seconds wait
-            setError("Snelheidslimiet bereikt. Wacht even tot de teller op 0 staat.");
-        }
-    };
-
+    // Handlers
     const toggleCategory = (id: number) => {
         if (selectedCatIds.includes(id)) {
             setSelectedCatIds(prev => prev.filter(c => c !== id));
         } else {
             if (selectedCatIds.length >= 3) {
-                alert("Kies maximaal 3 categorieën.");
+                // Shake effect or toast could go here
                 return;
             }
             setSelectedCatIds(prev => [...prev, id]);
         }
     };
 
-    const handleGenerateWords = async () => {
-        if (cooldown > 0 || isDailyLimit) return;
+    const handleGenerate = async () => {
         if (selectedCatIds.length === 0) {
-            setError("Selecteer ten minste één categorie.");
+            setError("Kies minimaal 1 categorie.");
             return;
         }
-        
-        setIsLoading(true);
+
+        setStep('processing');
+        setLogs(["Systeem initialiseren...", `Configuratie: Groep ${group}`, "Verbinding maken met AI..."]);
         setError(null);
-        setStatusText("De AI zoekt didactisch verantwoorde woorden en valideert deze...");
 
         try {
-            const words = await generateMixedWordList(selectedCatIds, group);
-            if (words.length === 0) throw new Error("Geen woorden gevonden");
-            setGeneratedWords(words);
-            setStage(1);
-        } catch (e: any) {
-            if (e.message === 'QUOTA_DAILY') {
-                handleQuotaError(true);
-            } else if (e.message === 'QUOTA_LIMIT') {
-                handleQuotaError(false);
-            } else {
-                setError(e.message || "Kon geen woorden genereren. Probeer het opnieuw.");
-            }
-        } finally {
-            setIsLoading(false);
-        }
-    };
+            const logUpdate = (msg: string) => setLogs(prev => [...prev, msg]);
 
-    const handleCreateOutput = async (type: 'dictee' | 'werkblad' | 'online') => {
-        if (cooldown > 0 || isDailyLimit) return;
-        setIsLoading(true);
-        setError(null);
-        
-        const baseData: WorksheetData = {
-            id: Date.now().toString(),
-            created_at: new Date().toISOString(),
-            title: type === 'dictee' ? `Dictee Groep ${group}` : type === 'online' ? `Online Oefening Groep ${group}` : `Werkblad Groep ${group}`,
-            group,
-            categories: selectedCatIds,
-            woordenlijst: generatedWords,
-        };
-
-        try {
-            if (type === 'dictee') {
-                // For Dictation, we skip generating sentences here.
-                // We hand off to the DictationCard module which lets the user generate them interactively.
-                onStartDictation(baseData);
-            } else {
-                setStatusText("Oefeningen genereren...");
-                const exercises = await generateExercises(generatedWords, group);
-                baseData.oefeningen = exercises;
-                // STUUR MODUS MEE: 'print' als werkblad, anders 'fill' (online)
-                onWorksheetCreated(baseData, type === 'werkblad' ? 'print' : 'fill');
-            }
+            // 1. Generate Words
+            const words = await generateMixedWordList(selectedCatIds, group, logUpdate);
             
+            if (words.length === 0) throw new Error("Geen woorden gegenereerd.");
+
+            // 2. Generate Exercises immediately to have a complete object
+            logUpdate("🎨 Oefeningen genereren en layout voorbereiden...");
+            const exercises = await generateExercises(words, group);
+
+            // 3. Create Data Object
+            const newData: WorksheetData = {
+                id: Date.now().toString(),
+                created_at: new Date().toISOString(),
+                title: `Oefening Groep ${group}`,
+                group,
+                categories: selectedCatIds,
+                woordenlijst: words,
+                oefeningen: exercises
+            };
+
+            setGeneratedData(newData);
+            logUpdate("✅ Klaar! Oefening opgeslagen in geheugen.");
+            
+            // Short delay to let user see "Success"
+            setTimeout(() => {
+                setStep('actions');
+            }, 1000);
+
         } catch (e: any) {
-            if (e.message === 'QUOTA_DAILY') {
-                handleQuotaError(true);
+             if (e.message === 'QUOTA_DAILY') {
+                setIsDailyLimit(true);
+                setLogs(p => [...p, "❌ FOUT: Daglimiet bereikt."]);
             } else if (e.message === 'QUOTA_LIMIT') {
-                handleQuotaError(false);
+                setCooldown(60);
+                setLogs(p => [...p, "❌ FOUT: Snelheidslimiet. Wacht 60s."]);
+                // Go back to categories after a bit? Or stay to show error
             } else {
-                setError("Fout bij het genereren van de output. Probeer het later.");
+                setLogs(p => [...p, `❌ CRITICAL: ${e.message}`]);
             }
-        } finally {
-            setIsLoading(false);
         }
     };
 
-    if (isLoading) {
+    // --- RENDER STEPS ---
+
+    const renderHeader = (title: string, subtitle: string, backAction?: () => void) => (
+        <div className="mb-6">
+            {backAction && (
+                <button onClick={backAction} className="text-slate-400 text-sm font-bold mb-2 flex items-center hover:text-slate-600">
+                    <i className="fas fa-arrow-left mr-2"></i> Terug
+                </button>
+            )}
+            <h2 className="text-2xl md:text-3xl font-extrabold text-slate-800">{title}</h2>
+            <p className="text-slate-500">{subtitle}</p>
+        </div>
+    );
+
+    // STEP 1: GROUP SELECTION
+    if (step === 'group') {
         return (
-            <div className="max-w-2xl mx-auto bg-white p-12 rounded-2xl shadow-sm border border-slate-200 text-center">
-                <div className="mb-6">
-                    <i className="fas fa-spinner fa-spin text-5xl text-blue-500"></i>
-                </div>
-                <h3 className="text-xl font-bold text-slate-800 mb-2">Even geduld...</h3>
-                <p className="text-slate-500">{statusText}</p>
-            </div>
-        );
-    }
-
-    // Cooldown Overlay with Daily limit info
-    const CooldownNotice = () => {
-        if (isDailyLimit) {
-            return (
-                <div className="bg-red-50 text-red-800 p-4 rounded-xl border border-red-200 flex items-start gap-3 mb-6">
-                    <i className="fas fa-ban text-xl mt-1"></i>
-                    <div>
-                        <span className="font-bold block">Daglimiet Bereikt</span> 
-                        <span className="text-sm">Je hebt vandaag te veel verzoeken gedaan (1500). De limiet reset morgenochtend rond 09:00 uur.</span>
-                    </div>
-                </div>
-            );
-        }
-
-        if (cooldown > 0) {
-            return (
-                <div className="bg-orange-50 text-orange-800 p-4 rounded-xl border border-orange-200 flex flex-col gap-2 mb-6">
-                    <div className="flex items-center gap-3 animate-pulse">
-                        <i className="fas fa-clock text-xl"></i>
-                        <div>
-                            <span className="font-bold">Even wachten...</span> 
-                            <span className="ml-1">De AI moet afkoelen. Je kunt weer genereren over: <span className="font-mono font-bold text-lg">{cooldown}s</span></span>
-                        </div>
-                    </div>
-                    <p className="text-xs text-orange-700/70 ml-8">
-                        * Als het na het wachten nog niet lukt, heb je mogelijk je daglimiet bereikt.
-                    </p>
-                </div>
-            );
-        }
-        return null;
-    };
-
-    if (stage === 1) {
-        return (
-            <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="bg-green-50 p-6 border-b border-green-100 flex justify-between items-center">
-                    <div>
-                         <h2 className="text-2xl font-bold text-green-800">
-                            <i className="fas fa-clipboard-check mr-2"></i>
-                            Woordenlijst Klaar
-                        </h2>
-                        <p className="text-green-700 text-sm mt-1">Deze woorden zijn didactisch gevalideerd voor groep {group}.</p>
-                    </div>
-                    <button onClick={() => setStage(0)} className="text-green-700 text-sm bg-white/50 px-3 py-1 rounded hover:bg-white transition-colors">
-                        <i className="fas fa-redo mr-1"></i> Opnieuw
-                    </button>
-                </div>
-
-                <div className="p-8">
-                    <CooldownNotice />
-                    {error && !cooldown && !isDailyLimit && <p className="mb-4 text-red-500 font-medium bg-red-50 p-3 rounded-lg">{error}</p>}
-
-                    {/* Word List Section */}
-                    <div className="mb-8">
-                        <div className="flex justify-between items-end mb-4">
-                             <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider">Gegenereerde Woorden ({generatedWords.length})</h3>
-                             <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100">
-                                 <i className="fas fa-shield-alt mr-1"></i> OpenTaal Validated
-                             </span>
-                        </div>
-                       
-                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                            {generatedWords.map((w, i) => (
-                                <div key={i} className="flex items-center p-3 bg-white rounded-lg border border-slate-200 shadow-sm transition-all hover:border-green-300 hover:shadow-md">
-                                    <div className="w-6 h-6 rounded-full bg-green-100 text-green-700 font-bold text-xs flex items-center justify-center mr-2 flex-shrink-0">
-                                         {w.categorie}
-                                    </div>
-                                    <span className="text-slate-700 font-bold text-sm truncate">
-                                        {w.woord}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Action Section */}
-                    <div className="border-t border-slate-100 pt-8 mt-8 bg-slate-50 -mx-8 -mb-8 p-8">
-                        <h3 className="text-lg font-bold text-slate-800 mb-2 text-center">Wat wil je doen met deze woorden?</h3>
-                        <p className="text-center text-slate-500 text-sm mb-6">Kies een werkvorm om direct aan de slag te gaan.</p>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-3xl mx-auto">
-                            {['dictee', 'werkblad', 'online'].map((t) => (
-                                <button 
-                                    key={t}
-                                    onClick={() => handleCreateOutput(t as any)} 
-                                    disabled={cooldown > 0 || isDailyLimit}
-                                    className={`group relative p-6 rounded-xl border-2 transition-all text-left bg-white shadow-sm overflow-hidden ${
-                                        (cooldown > 0 || isDailyLimit) ? 'border-slate-100 opacity-50 cursor-not-allowed' : 
-                                        'border-slate-200 hover:border-blue-500 hover:shadow-lg hover:-translate-y-1'
-                                    }`}
-                                >
-                                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-transparent to-slate-50 rounded-bl-full -mr-8 -mt-8 transition-colors group-hover:to-blue-50"></div>
-                                    <div className="relative z-10">
-                                        <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                            <i className={`fas ${t === 'dictee' ? 'fa-microphone-alt' : t === 'werkblad' ? 'fa-print' : 'fa-laptop'} text-xl`}></i>
-                                        </div>
-                                        <h4 className="font-bold text-slate-800 mb-1 capitalize text-lg">{t === 'online' ? 'Online Oefenen' : t === 'dictee' ? 'Dicteekaart' : 'Print Werkblad'}</h4>
-                                        <p className="text-xs text-slate-500">
-                                            {t === 'dictee' && "Inclusief voorlees-zinnen"}
-                                            {t === 'werkblad' && "Printklaar PDF formaat"}
-                                            {t === 'online' && "Interactief invullen & nakijken"}
-                                        </p>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="bg-slate-50 p-6 border-b border-slate-200">
-                <h2 className="text-2xl font-bold text-slate-800">Het Woorden Laboratorium</h2>
-                <p className="text-slate-500">Stap 1: Stel je mix samen en genereer de basislijst.</p>
-            </div>
-
-            <div className="p-8 space-y-8">
-                <CooldownNotice />
+            <div className="max-w-2xl mx-auto animate-fade-in">
+                {renderHeader("Start Nieuwe Oefening", "Voor welke groep is dit werkblad?")}
                 
-                <div>
-                    <h3 className="text-lg font-bold text-slate-700 mb-4 flex items-center">
-                        <span className="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mr-3 text-sm">1</span>
-                        Kies de groep
-                    </h3>
-                    <div className="flex gap-3">
-                        {['4', '5', '6', '7/8'].map(g => {
-                             const val = g === '7/8' ? '7' : g;
-                             const isActive = group === val;
-                             return (
-                                 <button
-                                     key={g}
-                                     onClick={() => { setGroup(val); setSelectedCatIds([]); }}
-                                     className={`px-6 py-3 rounded-lg font-semibold transition-all border-2 ${isActive ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-100 hover:border-blue-200 text-slate-600'}`}
-                                 >
-                                     Groep {g}
-                                 </button>
-                             );
+                <div className="grid grid-cols-2 gap-4">
+                    {['4', '5', '6', '7/8'].map(g => {
+                         const val = g === '7/8' ? '7' : g;
+                         return (
+                            <button
+                                key={g}
+                                onClick={() => { setGroup(val); setStep('categories'); setSelectedCatIds([]); }}
+                                className="group relative bg-white p-6 rounded-2xl border-2 border-slate-100 shadow-sm hover:border-blue-500 hover:shadow-lg transition-all text-left overflow-hidden h-32 md:h-40 flex flex-col justify-end"
+                            >
+                                <div className="absolute top-4 right-4 w-10 h-10 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                    {g}
+                                </div>
+                                <span className="text-sm text-slate-400 font-bold uppercase tracking-wider mb-1">Groep</span>
+                                <span className="text-3xl font-extrabold text-slate-800 group-hover:text-blue-600 transition-colors">{g}</span>
+                            </button>
+                         );
+                    })}
+                </div>
+            </div>
+        );
+    }
+
+    // STEP 2: CATEGORY SELECTION
+    if (step === 'categories') {
+        return (
+            <div className="max-w-4xl mx-auto animate-fade-in flex flex-col h-[calc(100vh-100px)] md:h-auto">
+                {renderHeader(
+                    `Groep ${group}: Categorieën`, 
+                    `Selecteer maximaal 3 regels (${selectedCatIds.length}/3)`, 
+                    () => setStep('group')
+                )}
+
+                <div className="flex-1 overflow-y-auto pr-2 -mr-2 mb-20 md:mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        {(GROUP_CATEGORIES[group] || []).map(catId => {
+                            const isSelected = selectedCatIds.includes(catId);
+                            const isDisabled = !isSelected && selectedCatIds.length >= 3;
+                            
+                            return (
+                                <button
+                                    key={catId}
+                                    onClick={() => toggleCategory(catId)}
+                                    disabled={isDisabled}
+                                    className={`relative p-4 rounded-xl border-2 text-left transition-all 
+                                        ${isSelected 
+                                            ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500' 
+                                            : isDisabled 
+                                                ? 'border-slate-100 opacity-50 cursor-not-allowed bg-slate-50'
+                                                : 'border-slate-200 bg-white hover:border-blue-300'
+                                        }`}
+                                >
+                                    <div className="flex items-start gap-3">
+                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 transition-colors
+                                            ${isSelected ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>
+                                            {catId}
+                                        </div>
+                                        <div className="font-bold text-slate-700 leading-tight">
+                                            {CATEGORIES[catId]}
+                                        </div>
+                                    </div>
+                                    {isSelected && <div className="absolute top-3 right-3 text-blue-600"><i className="fas fa-check-circle"></i></div>}
+                                </button>
+                            );
                         })}
                     </div>
                 </div>
 
-                <div>
-                    <h3 className="text-lg font-bold text-slate-700 mb-4 flex items-center">
-                        <span className="w-8 h-8 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center mr-3 text-sm">2</span>
-                        Selecteer categorieën (max 3)
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-                        {(GROUP_CATEGORIES[group] || []).map(catId => (
-                            <label 
-                                key={catId} 
-                                className={`flex items-center p-3 rounded-lg border cursor-pointer transition-all ${selectedCatIds.includes(catId) ? 'border-blue-500 bg-blue-50' : 'border-slate-200 hover:border-blue-300'}`}
-                            >
-                                <input 
-                                    type="checkbox"
-                                    className="h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
-                                    checked={selectedCatIds.includes(catId)}
-                                    onChange={() => toggleCategory(catId)}
-                                />
-                                <span className="ml-3 text-sm font-medium text-slate-700">
-                                    <span className="font-bold text-blue-600 mr-1">{catId}.</span>
-                                    {CATEGORIES[catId]}
-                                </span>
-                            </label>
-                        ))}
+                {/* Floating Bottom Action Bar for Mobile/Desktop */}
+                <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-slate-200 md:static md:bg-transparent md:border-0 md:p-0 z-10">
+                    <div className="max-w-4xl mx-auto">
+                        {error && <div className="mb-2 text-red-500 text-sm text-center font-bold">{error}</div>}
+                        <button
+                            onClick={handleGenerate}
+                            disabled={selectedCatIds.length === 0 || cooldown > 0}
+                            className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-3 transition-all
+                                ${selectedCatIds.length === 0 
+                                    ? 'bg-slate-200 text-slate-400 cursor-not-allowed' 
+                                    : 'bg-green-600 text-white hover:bg-green-500 hover:-translate-y-1'
+                                }`}
+                        >
+                            {selectedCatIds.length === 0 ? 'Kies eerst een regel' : `Start Woorden Lab (${selectedCatIds.length})`}
+                            {selectedCatIds.length > 0 && <i className="fas fa-flask"></i>}
+                        </button>
                     </div>
                 </div>
+            </div>
+        );
+    }
 
-                <div className="pt-6 border-t border-slate-100">
-                    <button 
-                        onClick={handleGenerateWords}
-                        disabled={isLoading || cooldown > 0 || isDailyLimit}
-                        className={`w-full md:w-auto md:min-w-[200px] flex items-center justify-center gap-3 px-8 py-4 rounded-xl text-white font-bold text-lg shadow-lg transition-all ${ (cooldown > 0 || isDailyLimit) ? 'bg-slate-400 cursor-not-allowed' : 'hover:shadow-xl hover:-translate-y-1'}`}
-                        style={{backgroundColor: (cooldown > 0 || isDailyLimit) ? undefined : COLORS.orange}}
-                    >
-                        {isLoading ? (
-                            <><i className="fas fa-spinner fa-spin"></i> Bezig...</>
-                        ) : cooldown > 0 ? (
-                            <><i className="fas fa-hourglass-half"></i> Wacht {cooldown}s</>
-                        ) : isDailyLimit ? (
-                             <><i className="fas fa-ban"></i> Limiet Bereikt</>
-                        ) : (
-                            <><i className="fas fa-flask"></i> Genereer Woordenlijst</>
-                        )}
-                    </button>
-                    {error && !cooldown && !isDailyLimit && <p className="mt-4 text-red-500 font-medium bg-red-50 p-3 rounded-lg">{error}</p>}
+    // STEP 3: PROCESSING (CHAT SCREEN)
+    if (step === 'processing') {
+        return (
+            <div className="max-w-2xl mx-auto animate-fade-in h-[80vh] flex flex-col">
+                <div className="text-center mb-6">
+                    <div className="w-16 h-16 bg-slate-900 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-xl animate-pulse">
+                        <i className="fas fa-robot text-3xl text-green-400"></i>
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800">Het Lab is bezig...</h3>
+                    <p className="text-slate-500">De AI stelt nu een unieke oefening samen.</p>
+                </div>
+
+                <div className="flex-1 bg-slate-900 rounded-xl border border-slate-700 p-4 font-mono text-sm overflow-hidden flex flex-col shadow-inner relative">
+                    {/* Fake Window Controls */}
+                    <div className="flex gap-2 mb-4 border-b border-slate-700 pb-2">
+                        <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                        <span className="text-slate-500 ml-2 text-xs">staalmaatje-core — ai-process</span>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-slate-700">
+                        {logs.map((log, i) => {
+                             let color = "text-slate-300";
+                             if (log.includes("Fase")) color = "text-blue-400 font-bold";
+                             if (log.includes("✅")) color = "text-green-400";
+                             if (log.includes("❌")) color = "text-red-400";
+                             
+                             return (
+                                 <div key={i} className={`${color} animate-fade-in-up`}>
+                                     <span className="opacity-40 mr-2">$</span>
+                                     {log}
+                                 </div>
+                             );
+                        })}
+                        {isDailyLimit && <div className="text-red-500 font-bold mt-2">PROCESS TERMINATED: QUOTA EXCEEDED.</div>}
+                        <div ref={logsEndRef} />
+                    </div>
                 </div>
             </div>
-        </div>
-    );
+        );
+    }
+
+    // STEP 4: ACTIONS (RESULT)
+    if (step === 'actions' && generatedData) {
+        return (
+            <div className="max-w-3xl mx-auto animate-fade-in text-center pt-8">
+                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce-subtle">
+                    <i className="fas fa-check text-5xl text-green-600"></i>
+                </div>
+                
+                <h2 className="text-3xl font-extrabold text-slate-800 mb-2">Missie Geslaagd!</h2>
+                <p className="text-slate-600 mb-8 max-w-md mx-auto">
+                    We hebben <strong>{generatedData.woordenlijst.length} woorden</strong> en zinnen gegenereerd voor <strong>Groep {generatedData.group}</strong>. 
+                    <br/>Wat wil je nu doen?
+                </p>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                    {/* DICTEE ACTION */}
+                    <button 
+                        onClick={() => onStartDictation(generatedData)}
+                        className="group bg-white p-8 rounded-2xl border-2 border-slate-100 shadow-sm hover:border-blue-500 hover:shadow-xl transition-all flex flex-col items-center"
+                    >
+                        <div className="w-16 h-16 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center mb-4 text-3xl group-hover:scale-110 transition-transform">
+                            <i className="fas fa-microphone-alt"></i>
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800 mb-1">Dictee Starten</h3>
+                        <p className="text-sm text-slate-500">Interactief dictee of printen voor de leerkracht.</p>
+                    </button>
+
+                    {/* WORKSHEET ACTION */}
+                    <button 
+                        onClick={() => onWorksheetCreated(generatedData, 'print')}
+                        className="group bg-white p-8 rounded-2xl border-2 border-slate-100 shadow-sm hover:border-green-500 hover:shadow-xl transition-all flex flex-col items-center"
+                    >
+                        <div className="w-16 h-16 bg-green-50 text-green-600 rounded-xl flex items-center justify-center mb-4 text-3xl group-hover:scale-110 transition-transform">
+                            <i className="fas fa-print"></i>
+                        </div>
+                        <h3 className="text-xl font-bold text-slate-800 mb-1">Werkblad Maken</h3>
+                        <p className="text-sm text-slate-500">Printklaar PDF werkblad met 3 didactische stappen.</p>
+                    </button>
+                </div>
+
+                <div className="mt-12">
+                     <button 
+                        onClick={() => { setStep('group'); setGeneratedData(null); }}
+                        className="text-slate-400 font-bold text-sm hover:text-slate-600 underline"
+                     >
+                        Begin helemaal opnieuw
+                     </button>
+                </div>
+            </div>
+        );
+    }
+
+    return null;
 };
 
 export default WorksheetCreator;
