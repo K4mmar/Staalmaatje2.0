@@ -3,12 +3,13 @@ import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  // Use (process as any).cwd() to avoid TS error: Property 'cwd' does not exist on type 'Process'
-  const env = loadEnv(mode, (process as any).cwd(), '');
+  // Laad variabelen uit de omgeving (Netlify Dashboard)
+  const env = loadEnv(mode, process.cwd(), '');
+
   return {
     plugins: [react()],
     define: {
-      // Dit zorgt ervoor dat process.env.API_KEY werkt in de browser na de build
+      // Dit zorgt dat jouw code toegang heeft tot de sleutel die je in Netlify hebt ingesteld
       'process.env.API_KEY': JSON.stringify(env.API_KEY)
     }
   };
